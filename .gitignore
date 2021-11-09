@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+#ignore config
+Meditrash4+Midpoint/bin/Debug/net5.0/configFile.json

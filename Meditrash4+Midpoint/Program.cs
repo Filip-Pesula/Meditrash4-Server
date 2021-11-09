@@ -10,22 +10,21 @@ namespace Meditrash4_Midpoint
     {
         static void Main(string[] args)
         {
-            string connStr = "server=localhost;user=root;database=db0;port=3306;password=1955";
-            MySqlConnection conn = new MySqlConnection(connStr);
+            ServerSetup setup = new ServerSetup("confugFile.json");
+            string connStr = setup.getConnectionString();
+
+            MySqlHandle mySqlHandle = new MySqlHandle(setup);
+           
+            
 
             try
             {
                 Console.WriteLine("Connecting to MySQL...");
-                conn.Open();
+                mySqlHandle.connect();
 
-                string sql = "SELECT COUNT(*) FROM Country";
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                object result = cmd.ExecuteScalar();
-                if (result != null)
-                {
-                    int r = Convert.ToInt32(result);
-                    Console.WriteLine("Number of countries in the world database is: " + r);
-                }
+
+                string sql = "SELECT* FROM users";
+                mySqlHandle.querry(sql,10);
 
             }
             catch (Exception ex)
@@ -33,8 +32,9 @@ namespace Meditrash4_Midpoint
                 Console.WriteLine(ex.ToString());
             }
 
-            conn.Close();
+            mySqlHandle.close();
             Console.WriteLine("Done.");
+            setup.save();
         }
     }
 }
