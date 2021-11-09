@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meditrash4+Midpoint", "Meditrash4+Midpoint\Meditrash4+Midpoint.csproj", "{05A55CE5-F335-4995-BD97-6837D04BB193}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05A55CE5-F335-4995-BD97-6837D04BB193}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05A55CE5-F335-4995-BD97-6837D04BB193}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05A55CE5-F335-4995-BD97-6837D04BB193}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05A55CE5-F335-4995-BD97-6837D04BB193}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4B4FE0D6-6F6E-4993-A52D-B74E4D01869E}
+	EndGlobalSection
+EndGlobal
