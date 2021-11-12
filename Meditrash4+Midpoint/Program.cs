@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 
 using MySql.Data;
@@ -14,8 +15,6 @@ namespace Meditrash4_Midpoint
             string connStr = setup.getConnectionString();
 
             MySqlHandle mySqlHandle = new MySqlHandle(setup);
-           
-            
 
             try
             {
@@ -25,6 +24,9 @@ namespace Meditrash4_Midpoint
 
                 string sql = "SELECT* FROM users";
                 mySqlHandle.querry(sql,10);
+                String testName = MySqlHelper.EscapeString("osoba'1");
+
+                List<User> users = mySqlHandle.GetObjectList<User>("name="+"'"+testName+ "'", 2);
 
             }
             catch (Exception ex)

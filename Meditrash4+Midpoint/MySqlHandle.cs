@@ -42,10 +42,53 @@ namespace Meditrash4_Midpoint
             if (resultReader.HasRows) {
                 while (resultReader.Read())
                 {
-                    Console.WriteLine("usrName:"+resultReader.GetString(0));
+                    for (int i = 0; i < resultReader.FieldCount; i++)
+                    {
+                        Console.WriteLine("usrType: " + resultReader.GetFieldType(i));
+                    }
                 }
             }
-            
+            resultReader.Close();
+            return returnVals;
+        }
+        public List<T> GetObjectList<T>(string condition, int max = -1) where T : MysqlReadable, new()
+        {
+            T t = new T();
+            MySqlCommand cmd = new MySqlCommand("SELECT * FROM " + t.getMyName() + " WHERE " + condition, conn);
+            MySqlDataReader resultReader = cmd.ExecuteReader();
+            List<T> returnVals = new List<T>();
+            Console.WriteLine("usersFCount" + resultReader.FieldCount);
+
+            List<Type> typelist =  t.getMyTypeList();
+
+
+            if (resultReader.FieldCount != typelist.Count)
+            {
+                throw new UnmatchingTypeListException();
+            }
+            if (resultReader.HasRows) {
+                for (int i = 0; i < resultReader.FieldCount; i++)
+                {
+                    if(typelist[i]!= resultReader.GetFieldType(i))
+                    {
+                        throw new UnmatchingTypeListException();
+                    }
+                    Console.WriteLine("usrType: " + resultReader.GetFieldType(i));
+                }
+
+                while (resultReader.Read())
+                {
+                    List<Object> data = new List<Object>();
+                    for (int i = 0; i < resultReader.FieldCount; i++)
+                    {
+                        data.Add(resultReader.GetValue(i));
+                    }
+                    T _object = new T();
+                    _object.getMyData(data);
+                    returnVals.Add(_object);
+                }
+            }
+            resultReader.Close();
             return returnVals;
         }
     }
