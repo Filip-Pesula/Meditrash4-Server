@@ -13,6 +13,7 @@ namespace Meditrash4_Midpoint
         {
             ServerSetup setup = new ServerSetup("confugFile.json");
             string connStr = setup.getConnectionString();
+            AppConnector appConnector = new AppConnector();
 
             MySqlHandle mySqlHandle = new MySqlHandle(setup);
 
@@ -33,9 +34,12 @@ namespace Meditrash4_Midpoint
             {
                 Console.WriteLine(ex.ToString());
             }
+            Console.WriteLine("PressEnter to exit");
+            while (Console.ReadKey().Key != ConsoleKey.Enter) { };
 
             mySqlHandle.close();
             Console.WriteLine("Done.");
+            appConnector.stop();
             setup.save();
         }
     }
