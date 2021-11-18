@@ -28,19 +28,29 @@ namespace Meditrash4_Midpoint
                 String testName = MySqlHelper.EscapeString("osoba'1");
 
                 List<User> users = mySqlHandle.GetObjectList<User>("name="+"'"+testName+ "'", 2);
+                User userToset = new User("osoba3",DateTime.Now);
+                try
+                {
+                    mySqlHandle.saveObject(userToset);
+                }
+                catch(MySqlException e)
+                {
+
+                    Logger.LogE("writing user error", e);
+                }
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Logger.LogE(ex);
             }
             Console.WriteLine("PressEnter to exit");
             while (Console.ReadKey().Key != ConsoleKey.Enter) { };
 
             mySqlHandle.close();
-            Console.WriteLine("Done.");
             appConnector.stop();
             setup.save();
+            Logger.Log("Done.",ConsoleColor.Green);
         }
     }
 }

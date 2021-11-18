@@ -12,11 +12,31 @@ namespace Meditrash4_Midpoint
         public string userName { get; private set; }
         public DateTime bDate { get; private set; }
         public int id { get; private set; }
-        public void getMyData(List<Object> data)
+        public User()
         {
-            userName = (string)data[0];
-            bDate = (DateTime)data[1];
-            id = (int)data[2];
+            this.userName = "";
+            this.bDate = DateTime.MinValue;
+            this.id = -1;
+        }
+        public User(string userName, DateTime bDate)
+        {
+            this.userName = userName;
+            this.bDate = bDate;
+            this.id = -1;
+        }
+        public void setMyData(List<Object> data)
+        {
+            try
+            {
+                userName = (string)data[0];
+                bDate = (DateTime)data[1];
+                id = (int)data[2];
+            }
+            catch(Exception e)
+            {
+                throw new UnmatchingTypeListException("User data format not correct", e);
+            }
+            
         }
 
         public string getMyName()
@@ -31,6 +51,21 @@ namespace Meditrash4_Midpoint
             a.Add(typeof(System.DateTime));
             a.Add(typeof(System.Int32));
             return  a;
+        }
+
+
+
+        public string writeQuerry()
+        {
+            return "(name,birth)";
+        }
+
+        public List<object> getMyValues()
+        {
+            List<object>  a =  new List<object>();
+            a.Add(userName);
+            a.Add(bDate.Date);
+            return a;
         }
     }
 }

@@ -51,6 +51,32 @@ namespace Meditrash4_Midpoint
             resultReader.Close();
             return returnVals;
         }
+        public void saveObject<T>(T _object) where T : MysqlReadable
+        {
+            StringBuilder values = new StringBuilder("(");
+            foreach (Object obj in _object.getMyValues())
+            {
+                switch (obj)
+                {
+                    case System.DateTime:
+                        values.Append("'");
+                        values.Append(MySqlHelper.EscapeString(((DateTime)obj).ToString("yyyy-MM-dd")));
+                        values.Append("'");
+                        break;
+                    default:
+                        values.Append("'");
+                        values.Append(MySqlHelper.EscapeString(obj.ToString()));
+                        values.Append("'");
+                        break;
+                }
+               
+                values.Append(",");
+            }
+            values.Remove(values.Length - 1, 1);
+            values.Append(")");
+            MySqlCommand cmd = new MySqlCommand("INSERT INTO " + _object.getMyName() + _object.writeQuerry() + " VALUES " + values.ToString() + ";", conn);
+            int execution = cmd.ExecuteNonQuery();
+        }
         public List<T> GetObjectList<T>(string condition, int max = -1) where T : MysqlReadable, new()
         {
             T t = new T();
@@ -84,7 +110,7 @@ namespace Meditrash4_Midpoint
                         data.Add(resultReader.GetValue(i));
                     }
                     T _object = new T();
-                    _object.getMyData(data);
+                    _object.setMyData(data);
                     returnVals.Add(_object);
                 }
             }

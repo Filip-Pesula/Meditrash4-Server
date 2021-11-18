@@ -9,7 +9,9 @@ namespace Meditrash4_Midpoint
     interface MysqlReadable
     {
         List<Type> getMyTypeList();
-        void getMyData(List<Object> data);
+        void setMyData(List<Object> data);
+        string writeQuerry();
+        List<Object> getMyValues();
         string getMyName();
     }
 }
