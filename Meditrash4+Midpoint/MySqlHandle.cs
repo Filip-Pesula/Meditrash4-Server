@@ -15,18 +15,7 @@ namespace Meditrash4_Midpoint
         }
         public void connect()
         {
-            try
-            {
-                conn.Open();
-            }
-            catch(InvalidOperationException e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            catch (MySqlException e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            conn.Open();
         }
         public void close()
         {
@@ -50,6 +39,19 @@ namespace Meditrash4_Midpoint
             }
             resultReader.Close();
             return returnVals;
+        }
+        public void setObjectParam<T>(T _object, string collum, string value) where T : MysqlReadable
+        {
+            List<KeyValuePair<string, object>> vallist = _object.getMySerValuesTypeList();
+            List<int> pkList = _object.getPrimaryIndex();
+            string cond = "";
+            foreach(int obj in _object.getPrimaryIndex())
+            {
+                cond += vallist[obj].Key+ " '" + MySqlHelper.EscapeString(vallist[obj].Value.ToString()) + "' AND";
+            }
+            value = MySqlHelper.EscapeString(value);
+            MySqlCommand cmd = new MySqlCommand("UPDATE " + _object.getMyName() +  " SET " + collum + "='" +value+"'"+ " where " , conn);
+            int execution = cmd.ExecuteNonQuery();
         }
         public void saveObject<T>(T _object) where T : MysqlReadable
         {
@@ -85,7 +87,7 @@ namespace Meditrash4_Midpoint
             List<T> returnVals = new List<T>();
             Console.WriteLine("usersFCount" + resultReader.FieldCount);
 
-            List<Type> typelist =  t.getMyTypeList();
+            List<KeyValuePair<string,Type>> typelist = t.getMyTypeList();
 
 
             if (resultReader.FieldCount != typelist.Count)
@@ -95,7 +97,9 @@ namespace Meditrash4_Midpoint
             if (resultReader.HasRows) {
                 for (int i = 0; i < resultReader.FieldCount; i++)
                 {
-                    if(typelist[i]!= resultReader.GetFieldType(i))
+                    //TODO předělat na hashmap based on key
+                    resultReader.GetName();
+                    if (typelist[i].Value!= resultReader.GetFieldType(i))
                     {
                         throw new UnmatchingTypeListException();
                     }

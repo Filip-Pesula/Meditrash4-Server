@@ -13,9 +13,10 @@ namespace Meditrash4_Midpoint
         {
             ServerSetup setup = new ServerSetup("confugFile.json");
             string connStr = setup.getConnectionString();
-            AppConnector appConnector = new AppConnector();
 
             MySqlHandle mySqlHandle = new MySqlHandle(setup);
+
+            AppConnector appConnector = new AppConnector(mySqlHandle);
 
             try
             {
@@ -24,11 +25,15 @@ namespace Meditrash4_Midpoint
 
 
                 string sql = "SELECT* FROM users";
-                mySqlHandle.querry(sql,10);
-                String testName = MySqlHelper.EscapeString("osoba'1");
+                //mySqlHandle.querry(sql,10);
+                String testName = MySqlHelper.EscapeString("ROOT");
 
                 List<User> users = mySqlHandle.GetObjectList<User>("name="+"'"+testName+ "'", 2);
-                User userToset = new User("osoba3",DateTime.Now);
+                if (users.Count!=1) {
+                    Logger.Log("user ROOT not found");
+                }
+                /*
+                User userToset = new User("petr.novak", 5,1,"Petr","Novak");
                 try
                 {
                     mySqlHandle.saveObject(userToset);
@@ -38,6 +43,7 @@ namespace Meditrash4_Midpoint
 
                     Logger.LogE("writing user error", e);
                 }
+                */
 
             }
             catch (Exception ex)
