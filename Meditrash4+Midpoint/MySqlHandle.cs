@@ -15,18 +15,7 @@ namespace Meditrash4_Midpoint
         }
         public void connect()
         {
-            try
-            {
-                conn.Open();
-            }
-            catch(InvalidOperationException e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            catch (MySqlException e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            conn.Open();
         }
         public void close()
         {
@@ -50,6 +39,19 @@ namespace Meditrash4_Midpoint
             }
             resultReader.Close();
             return returnVals;
+        }
+        public void setObjectParam<T>(T _object, string collum, string value) where T : MysqlReadable
+        {
+            List<KeyValuePair<string, object>> vallist = _object.getMySerValuesTypeList();
+            List<int> pkList = _object.getPrimaryIndex();
+            string cond = "";
+            foreach(int obj in _object.getPrimaryIndex())
+            {
+                cond += vallist[obj].Key+ " '" + MySqlHelper.EscapeString(vallist[obj].Value.ToString()) + "' AND";
+            }
+            value = MySqlHelper.EscapeString(value);
+            MySqlCommand cmd = new MySqlCommand("UPDATE " + _object.getMyName() +  " SET " + collum + "='" +value+"'"+ " where " , conn);
+            int execution = cmd.ExecuteNonQuery();
         }
         public void saveObject<T>(T _object) where T : MysqlReadable
         {

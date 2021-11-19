@@ -8,6 +8,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Threading;
 using System.Security.Cryptography;
+using MySql.Data.MySqlClient;
 
 namespace Meditrash4_Midpoint
 {
@@ -16,10 +17,16 @@ namespace Meditrash4_Midpoint
         TcpListener listener;
         Thread serverThread;
         static RNGCryptoServiceProvider rg;
-        public AppConnector()
+        MySqlHandle mySqlHandle;
+        List<uint> resevedKeys;
+        //List<KeyValuePair<uint, string>> registeredList;
+        public AppConnector(MySqlHandle _mySqlHandle)
         {
+            this.mySqlHandle = _mySqlHandle;
             listener = new TcpListener(16246);
             listener.Start();
+            //registeredList = new List<KeyValuePair<uint, string>>();
+            resevedKeys = new List<uint>();
             rg = new RNGCryptoServiceProvider();
 
             //listener.BeginAcceptTcpClient(new AsyncCallback(DoAcceptTcpClientCallback),listener);
@@ -45,11 +52,14 @@ namespace Meditrash4_Midpoint
             // Get the listener that handles the client request.
             TcpListener listener = (TcpListener)ar.AsyncState;
             Console.WriteLine(listener.ToString());
+           
 
             // End the operation and display the received data on
             // the console.
             TcpClient client = listener.EndAcceptTcpClient(ar);
             NetworkStream  networkStream = client.GetStream();
+            
+            
             MemoryStream memoryStream = new MemoryStream();
             networkStream.CopyTo(memoryStream);
             String message = System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
@@ -71,7 +81,7 @@ namespace Meditrash4_Midpoint
             Console.WriteLine("Client connected completed");
         }
 
-        static void ProccesConnection(Object stateInflo)
+        private void ProccesConnection(Object stateInflo)
         {
             TcpClient client = (TcpClient)stateInflo;
             Console.WriteLine(client.Client.RemoteEndPoint.ToString());
@@ -86,11 +96,8 @@ namespace Meditrash4_Midpoint
                     case "Login":
                         uint key = processLogin(doc);
 
-
-                        
-
                         XElement body = new XElement("Login",
-                            new XElement("UniqueToken", key.ToString("X"))
+                            new XElement("uniqueToken", key.ToString("X"))
                             );
                         Console.WriteLine(body);
                         networkStream.Write(
@@ -98,7 +105,11 @@ namespace Meditrash4_Midpoint
                             0,
                             body.ToString().Length);
                         break;
-                    case "Body":
+                    case "Request":
+
+
+
+
                     default:
                         break;
                 }
@@ -119,18 +130,33 @@ namespace Meditrash4_Midpoint
             Console.WriteLine("Client connected completed");
         }
 
-        private static uint processLogin(XDocument doc)
+        private uint processLogin(XDocument doc)
         {
             XElement name = doc.Root.Element("name");
             XElement password = doc.Root.Element("password");
-            if (name.Value == "name" && password.Value == "password")
+
+            String testName = MySqlHelper.EscapeString(name.Value);
+            List<User> users = mySqlHandle.GetObjectList<User>("name=" + "'" + testName + "'", 2);
+            if (users.Count == 0)
             {
+                return 0;
+            }
+            
 
-                byte[] rno = new byte[5];
-                rg.GetBytes(rno);
-                uint randomvalue = BitConverter.ToUInt32(rno, 0);
-
-                return randomvalue;
+            if (password.Value == "password")
+            {
+                uint newRandKey = 0;
+                while (newRandKey==0)
+                {
+                    byte[] rno = new byte[5];
+                    rg.GetBytes(rno);
+                    uint randomvalue = BitConverter.ToUInt32(rno, 0);
+                    if (!resevedKeys.Contains(randomvalue)) 
+                    {
+                        newRandKey = randomvalue;
+                    }
+                }
+                return newRandKey;
             }
             return 0U;
         }

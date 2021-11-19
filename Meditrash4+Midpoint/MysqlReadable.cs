@@ -8,7 +8,9 @@ namespace Meditrash4_Midpoint
 {
     interface MysqlReadable
     {
-        List<Type> getMyTypeList();
+        List<int> getPrimaryIndex();
+        List<KeyValuePair<string,Type>> getMyTypeList();
+        List<KeyValuePair<string,object>> getMySerValuesTypeList();
         void setMyData(List<Object> data);
         string writeQuerry();
         List<Object> getMyValues();
