@@ -26,6 +26,8 @@ namespace Meditrash4_Midpoint
             }
             else
             {
+                string jsonTxt = JsonSerializer.Serialize(sData);
+                File.WriteAllText(setupFile, jsonTxt);
             }
         }
         public string getConnectionString()

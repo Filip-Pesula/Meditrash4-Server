@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using System.Threading;
 using System.Security.Cryptography;
 using MySql.Data.MySqlClient;
+using Meditrash4_Midpoint.mysqlTables;
 
 namespace Meditrash4_Midpoint
 {
@@ -19,13 +20,15 @@ namespace Meditrash4_Midpoint
         static RNGCryptoServiceProvider rg;
         MySqlHandle mySqlHandle;
         List<uint> resevedKeys;
+        List<KeyValuePair<uint, User>> registeredList;
+        
         //List<KeyValuePair<uint, string>> registeredList;
         public AppConnector(MySqlHandle _mySqlHandle)
         {
             this.mySqlHandle = _mySqlHandle;
             listener = new TcpListener(16246);
             listener.Start();
-            //registeredList = new List<KeyValuePair<uint, string>>();
+            registeredList = new List<KeyValuePair<uint, User>>();
             resevedKeys = new List<uint>();
             rg = new RNGCryptoServiceProvider();
 
@@ -47,39 +50,6 @@ namespace Meditrash4_Midpoint
             serverThread.Start();
 
         }
-        public static void DoAcceptTcpClientCallback(IAsyncResult ar)
-        {
-            // Get the listener that handles the client request.
-            TcpListener listener = (TcpListener)ar.AsyncState;
-            Console.WriteLine(listener.ToString());
-           
-
-            // End the operation and display the received data on
-            // the console.
-            TcpClient client = listener.EndAcceptTcpClient(ar);
-            NetworkStream  networkStream = client.GetStream();
-            
-            
-            MemoryStream memoryStream = new MemoryStream();
-            networkStream.CopyTo(memoryStream);
-            String message = System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
-            try
-            {
-                XDocument doc = XDocument.Parse(message);
-                Console.WriteLine(doc);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("parse error: " + e.Message);
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine(message);
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-
-            // Process the connection here. (Add the client to a
-            // server table, read data, etc.)
-            Console.WriteLine("Client connected completed");
-        }
 
         private void ProccesConnection(Object stateInflo)
         {
@@ -94,22 +64,70 @@ namespace Meditrash4_Midpoint
                 switch (doc.Root.Name.LocalName)
                 {
                     case "Login":
-                        uint key = processLogin(doc);
+                        {
+                            XElement name = doc.Root.Element("name");
+                            XElement password = doc.Root.Element("password");
 
-                        XElement body = new XElement("Login",
-                            new XElement("uniqueToken", key.ToString("X"))
-                            );
-                        Console.WriteLine(body);
-                        networkStream.Write(
-                            System.Text.Encoding.UTF8.GetBytes(body.ToString()),
-                            0,
-                            body.ToString().Length);
-                        break;
+                            String testName = MySqlHelper.EscapeString(name.Value);
+                            List<User> users = mySqlHandle.GetObjectList<User>("name=" + "'" + testName + "'", 2);
+                            if (users.Count == 0)
+                            {
+                                return;
+                            }
+                            User user = users[0];
+                            uint key = processLogin(doc, user);
+                            XElement body = null;
+                            if (key != 0)
+                            {
+                                body = new XElement("Login",
+                                    new XElement("uniqueToken", key.ToString("X")),
+                                    new XElement("firstName", user.firstName),
+                                    new XElement("lastName", user.lastName),
+                                    new XElement("rights", user.rights)
+                                    );
+                            }
+                            else
+                            {
+                                body = new XElement("Login",
+                                   new XElement("uniqueToken", key.ToString("0"))
+                                   );
+                            }
+                            Console.WriteLine(body);
+                            networkStream.Write(
+                                System.Text.Encoding.UTF8.GetBytes(body.ToString()),
+                                0,
+                                body.ToString().Length);
+                            break;
+                        }
                     case "Request":
-
-
-
-
+                        {
+                            XElement keyX = doc.Root.Element("uniqueToken");
+                            uint key = uint.Parse(keyX.Value,System.Globalization.NumberStyles.HexNumber);
+                            User user = null;
+                            foreach(KeyValuePair<uint,User> userPair in registeredList)
+                            {
+                                if(userPair.Key == key)
+                                {
+                                    user = userPair.Value;
+                                }
+                            }
+                            XElement response = null;
+                            if(user == null)
+                            {
+                                response = new XElement("RequestError",
+                                        "wrong Login"
+                                    );
+                            }
+                            else
+                            {
+                                response = processRequest(doc, user);
+                            }
+                            networkStream.Write(
+                                System.Text.Encoding.UTF8.GetBytes(response.ToString()),
+                                0,
+                                response.ToString().Length);
+                            break;
+                        }
                     default:
                         break;
                 }
@@ -118,7 +136,7 @@ namespace Meditrash4_Midpoint
             
             catch (Exception e)
             {
-                Console.WriteLine("parse error: " + e.Message);
+                Logger.LogE("parse error:", e);
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine(message);
                 Console.ForegroundColor = ConsoleColor.White;
@@ -130,7 +148,70 @@ namespace Meditrash4_Midpoint
             Console.WriteLine("Client connected completed");
         }
 
-        private uint processLogin(XDocument doc)
+        private XElement processRequest(XDocument doc, User opUser)
+        {
+            XElement response;
+            XElement requestCommand = doc.Root.Element("requestCommand");
+            XAttribute commandName = requestCommand.Attribute("name");
+            switch (commandName.Value)
+            {   
+                case "addUser":
+                    if (opUser.rights < 2)
+                    {
+                        return genIncorrectResponse("notPermitted", "not Permitted to this operation");
+                    }
+                    try
+                    {
+                        string department = requestCommand.Element("department").Value;
+                        List<Department> departments = mySqlHandle.GetObjectList<Department>("name='" + department + "'");
+                        if(departments.Count == 0)
+                        {
+                            return genIncorrectResponse("incorrectName", "department has incorrect name");
+                        }
+                        User user = new User(
+                            requestCommand.Element("name").Value,
+                            requestCommand.Element("password").Value,
+                            Int32.Parse(requestCommand.Element("rodCislo").Value),
+                            departments[0].id,
+                            Int32.Parse(requestCommand.Element("rights").Value),
+                            requestCommand.Element("firstName").Value,
+                            requestCommand.Element("lastName").Value
+                            );
+                        mySqlHandle.saveObject(user);
+                        return new XElement("Request", "user was Added");
+                    }
+                    catch(Exception ex)
+                    {
+                        return genIncorrectResponse("addingError","could not add user");
+                    }
+                    break;
+                case "addDepartment":
+                    if (opUser.rights < 2)
+                    {
+                        return genIncorrectResponse("notPermitted", "not Permitted to this operation");
+                    }
+                    try
+                    {
+                        Department department = new Department(requestCommand.Element("name").Value);
+                        mySqlHandle.saveObject(department);
+                        return new XElement("Request", "department was Added");
+                    }
+                    catch (Exception ex)
+                    {
+                        return genIncorrectResponse("addingError", "could not add department");
+                    }
+                    break;
+
+            }
+            return genIncorrectResponse("UnknownCommand", "Unknown Command");
+        }
+        private XElement genIncorrectResponse(string errorType,string message)
+        {
+            XElement response = new XElement("RequestError", message);
+            response.SetAttributeValue("type", errorType);
+            return response;
+        }
+        private uint processLogin(XDocument doc, User user)
         {
             XElement name = doc.Root.Element("name");
             XElement password = doc.Root.Element("password");
@@ -141,9 +222,9 @@ namespace Meditrash4_Midpoint
             {
                 return 0;
             }
-            
+            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(password.Value));
 
-            if (password.Value == "password")
+            if (hash.SequenceEqual(user.password))
             {
                 uint newRandKey = 0;
                 while (newRandKey==0)
@@ -156,10 +237,12 @@ namespace Meditrash4_Midpoint
                         newRandKey = randomvalue;
                     }
                 }
+                registeredList.Add(new KeyValuePair<uint, User>(newRandKey,user));
                 return newRandKey;
             }
             return 0U;
         }
+        
 
         public void stop()
         {      

@@ -3,11 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Text;
+using System.Threading;
+using System.Runtime.CompilerServices;
+[assembly: InternalsVisibleTo("Meditrash4_Midpoint.tests")]
 
 namespace Meditrash4_Midpoint
 {
     class MySqlHandle
     {
+        private static object connLock = new object();
         MySqlConnection conn;
         public MySqlHandle(ServerSetup sdata)
         {
@@ -42,84 +46,135 @@ namespace Meditrash4_Midpoint
         }
         public void setObjectParam<T>(T _object, string collum, string value) where T : MysqlReadable
         {
-            List<KeyValuePair<string, object>> vallist = _object.getMySerValuesTypeList();
+            List<DbVariable> vallist = _object.getObjectData();
             List<int> pkList = _object.getPrimaryIndex();
             string cond = "";
             foreach(int obj in _object.getPrimaryIndex())
             {
-                cond += vallist[obj].Key+ " '" + MySqlHelper.EscapeString(vallist[obj].Value.ToString()) + "' AND";
+                cond += vallist[obj].name+ " '" + MySqlHelper.EscapeString(vallist[obj].value.ToString()) + "' AND";
             }
             value = MySqlHelper.EscapeString(value);
             MySqlCommand cmd = new MySqlCommand("UPDATE " + _object.getMyName() +  " SET " + collum + "='" +value+"'"+ " where " , conn);
             int execution = cmd.ExecuteNonQuery();
         }
-        public void saveObject<T>(T _object) where T : MysqlReadable
+        
+        public static string genSelectCommandParamQ<T>(T _object) where T : MysqlReadable
         {
             StringBuilder values = new StringBuilder("(");
-            foreach (Object obj in _object.getMyValues())
+            List<DbVariable>  dataPairs = _object.getObjectData();
+            foreach (DbVariable obj in dataPairs)
             {
-                switch (obj)
-                {
-                    case System.DateTime:
-                        values.Append("'");
-                        values.Append(MySqlHelper.EscapeString(((DateTime)obj).ToString("yyyy-MM-dd")));
-                        values.Append("'");
-                        break;
-                    default:
-                        values.Append("'");
-                        values.Append(MySqlHelper.EscapeString(obj.ToString()));
-                        values.Append("'");
-                        break;
-                }
-               
-                values.Append(",");
+                values.Append('@');
+                values.Append(obj.name);
+                values.Append(',');
             }
-            values.Remove(values.Length - 1, 1);
+            values.Remove(values.Length-1,1);
             values.Append(")");
-            MySqlCommand cmd = new MySqlCommand("INSERT INTO " + _object.getMyName() + _object.writeQuerry() + " VALUES " + values.ToString() + ";", conn);
-            int execution = cmd.ExecuteNonQuery();
+            return values.ToString();
+        }
+        public static void fillSelectCommandParamQ<T>(ref MySqlCommand cmd, T _object) where T : MysqlReadable
+        {
+            List<DbVariable> dataPairs = _object.getObjectData();
+            foreach (DbVariable obj in dataPairs)
+            {
+                cmd.Parameters.Add('@' + obj.name, obj.type).Value = obj.value;
+            }
+        }
+        public void saveObject<T>(T _object) where T : MysqlReadable
+        {
+            Exception e = null;
+
+
+            Monitor.Enter(connLock);
+            try
+            {
+                string valText = _object.valueQuerry();
+                MySqlCommand cmd = new MySqlCommand("INSERT INTO " + _object.getMyName() + _object.writeQuerry() + " VALUES " + valText + ";", conn);
+                fillSelectCommandParamQ(ref cmd, _object);
+                int execution = cmd.ExecuteNonQuery();
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+            finally
+            {
+                Monitor.Exit(connLock);
+            }
+            
+            if (e != null)
+            {
+                throw e;
+            }
         }
         public List<T> GetObjectList<T>(string condition, int max = -1) where T : MysqlReadable, new()
         {
-            T t = new T();
-            MySqlCommand cmd = new MySqlCommand("SELECT * FROM " + t.getMyName() + " WHERE " + condition, conn);
-            MySqlDataReader resultReader = cmd.ExecuteReader();
-            List<T> returnVals = new List<T>();
-            Console.WriteLine("usersFCount" + resultReader.FieldCount);
-
-            List<KeyValuePair<string,Type>> typelist = t.getMyTypeList();
-
-
-            if (resultReader.FieldCount != typelist.Count)
+            Exception e = null;
+            Monitor.Enter(connLock);
+            MySqlDataReader resultReader = null;
+            try
             {
-                throw new UnmatchingTypeListException();
-            }
-            if (resultReader.HasRows) {
-                for (int i = 0; i < resultReader.FieldCount; i++)
-                {
-                    //TODO předělat na hashmap based on key
-                    resultReader.GetName();
-                    if (typelist[i].Value!= resultReader.GetFieldType(i))
-                    {
-                        throw new UnmatchingTypeListException();
-                    }
-                    Console.WriteLine("usrType: " + resultReader.GetFieldType(i));
-                }
+                T t = new T();
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM " + t.getMyName() + " WHERE " + condition, conn);
+                resultReader = cmd.ExecuteReader();
+                List<T> returnVals = new List<T>();
+                Console.WriteLine("usersFCount" + resultReader.FieldCount);
 
-                while (resultReader.Read())
+                List<KeyValuePair<string, Type>> typelist = t.getMyTypeList();
+
+
+                if (resultReader.FieldCount != typelist.Count)
                 {
-                    List<Object> data = new List<Object>();
+                    throw new UnmatchingTypeListException();
+                }
+                if (resultReader.HasRows)
+                {
                     for (int i = 0; i < resultReader.FieldCount; i++)
                     {
-                        data.Add(resultReader.GetValue(i));
+                        //TODO předělat na hashmap based on key
+                        resultReader.GetName(i);
+                        if (typelist[i].Value != resultReader.GetFieldType(i))
+                        {
+                            throw new UnmatchingTypeListException();
+                        }
+                        Console.WriteLine("usrType: " + resultReader.GetFieldType(i));
                     }
-                    T _object = new T();
-                    _object.setMyData(data);
-                    returnVals.Add(_object);
+
+                    while (resultReader.Read())
+                    {
+                        List<Object> data = new List<Object>();
+                        for (int i = 0; i < resultReader.FieldCount; i++)
+                        {
+                            object holderObj = resultReader.GetValue(i);
+                            if (resultReader.IsDBNull(i))
+                            {
+                                holderObj = null;
+                            }
+                            data.Add(holderObj);
+                        }
+                        T _object = new T();
+                        _object.setMyData(data);
+                        returnVals.Add(_object);
+                    }
                 }
+                return returnVals;
+            }catch (Exception ex)
+            {
+                e = ex;
             }
-            resultReader.Close();
-            return returnVals;
+            finally
+            {
+                if (resultReader != null)
+                {
+                    resultReader.Close();
+                }
+                Monitor.Exit(connLock);
+            }
+            if (e != null)
+            {
+                throw e;
+            }
+            return new List<T>();
         }
     }
 }
