@@ -50,8 +50,8 @@ namespace Meditrash4_Midpoint
             {
                 Logger.LogE(ex);
             }
-            Console.WriteLine("PressEnter to exit");
-            while (Console.ReadKey().Key != ConsoleKey.Enter) { };
+            Console.WriteLine("Press Escape to exit");
+            while (Console.ReadKey().Key != ConsoleKey.Escape) { };
 
             mySqlHandle.close();
             appConnector.stop();

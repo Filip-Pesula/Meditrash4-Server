@@ -25,7 +25,27 @@ namespace Meditrash4_Midpoint
         {
             conn.Close();
         }
-
+        public bool checkSql()
+        {
+            /*
+            MySqlCommand cmd = new MySqlCommand(querry, conn);
+            MySqlDataReader resultReader = cmd.ExecuteReader();
+            List<object> returnVals = new List<object>();
+            Console.WriteLine("usersFCount" + resultReader.FieldCount);
+            if (resultReader.HasRows)
+            {
+                while (resultReader.Read())
+                {
+                    for (int i = 0; i < resultReader.FieldCount; i++)
+                    {
+                        Console.WriteLine("usrType: " + resultReader.GetFieldType(i));
+                    }
+                }
+            }
+            resultReader.Close();
+            */
+            return false;
+        }
         public List<object> querry(string querry, int max = -1)
         {
             MySqlCommand cmd = new MySqlCommand(querry, conn);
@@ -118,7 +138,6 @@ namespace Meditrash4_Midpoint
                 MySqlCommand cmd = new MySqlCommand("SELECT * FROM " + t.getMyName() + " WHERE " + condition, conn);
                 resultReader = cmd.ExecuteReader();
                 List<T> returnVals = new List<T>();
-                Console.WriteLine("usersFCount" + resultReader.FieldCount);
 
                 List<KeyValuePair<string, Type>> typelist = t.getMyTypeList();
 
@@ -137,7 +156,6 @@ namespace Meditrash4_Midpoint
                         {
                             throw new UnmatchingTypeListException();
                         }
-                        Console.WriteLine("usrType: " + resultReader.GetFieldType(i));
                     }
 
                     while (resultReader.Read())

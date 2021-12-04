@@ -61,6 +61,7 @@ namespace Meditrash4_Midpoint
             {
                 message = read(networkStream, 5000);
                 XDocument doc = XDocument.Parse(message);
+                Console.WriteLine(doc.ToString());
                 switch (doc.Root.Name.LocalName)
                 {
                     case "Login":
@@ -92,11 +93,12 @@ namespace Meditrash4_Midpoint
                                    new XElement("uniqueToken", key.ToString("0"))
                                    );
                             }
-                            Console.WriteLine(body);
+                            XDocument rootDoc = new XDocument(new XDeclaration("1.0", "UTF-8", null), body);
+                            Console.WriteLine(rootDoc.ToString());
                             networkStream.Write(
-                                System.Text.Encoding.UTF8.GetBytes(body.ToString()),
+                                System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString()),
                                 0,
-                                body.ToString().Length);
+                                rootDoc.ToString().Length);
                             break;
                         }
                     case "Request":
@@ -122,16 +124,18 @@ namespace Meditrash4_Midpoint
                             {
                                 response = processRequest(doc, user);
                             }
+                            XDocument rootDoc = new XDocument(new XDeclaration("1.0","UTF-8",null), response);
+                            Console.WriteLine(rootDoc.ToString());
                             networkStream.Write(
-                                System.Text.Encoding.UTF8.GetBytes(response.ToString()),
+                                System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString()),
                                 0,
-                                response.ToString().Length);
+                                rootDoc.ToString().Length);
                             break;
                         }
                     default:
                         break;
                 }
-                Console.WriteLine(doc);
+                
             }
             
             catch (Exception e)
@@ -201,6 +205,58 @@ namespace Meditrash4_Midpoint
                         return genIncorrectResponse("addingError", "could not add department");
                     }
                     break;
+                case "addFavItem":
+                    {
+                        try
+                        {
+                            string trashId = requestCommand.Element("id").Value;
+                            List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
+                            TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
+                            mySqlHandle.saveObject(trashFaw);
+                            return new XElement("Request", "item was added");
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add item");
+                        }
+                        break;
+                    }
+                case "getFavList":
+                    {
+                        try
+                        {
+                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = " + MySqlHelper.EscapeString(opUser.rod_cislo.ToString()));
+
+                            XElement ansRoot =  new XElement("Request");
+                            foreach(Trash trash in trashList)
+                            {
+                                XElement item = new XElement("item");
+                                item.SetAttributeValue("name", trash.name);
+                                item.SetAttributeValue("id", trash.uid);
+                                ansRoot.Add(item);
+                            }
+                            return ansRoot;
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add item");
+                        }
+                        break;
+                    }
+                case "trashItem":
+                    try
+                    {
+                        string trashId = requestCommand.Element("id").Value;
+                        List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
+                        TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
+                        mySqlHandle.saveObject(trashFaw);
+                        return new XElement("Request", "item was added");
+                    }
+                    catch (Exception ex)
+                    {
+                        return genIncorrectResponse("addingError", "could not add item");
+                    }
+                    break;
 
             }
             return genIncorrectResponse("UnknownCommand", "Unknown Command");
@@ -252,7 +308,18 @@ namespace Meditrash4_Midpoint
         {
             listener.Stop();
         }
-
+        private User getUserByKey(uint key)
+        {
+            User user = null;
+            foreach (KeyValuePair<uint, User> userPair in registeredList)
+            {
+                if (userPair.Key == key)
+                {
+                    user = userPair.Value;
+                }
+            }
+            return user;
+        }
 
         private static string read(NetworkStream networkStream, long timeout = 3000)
         {
