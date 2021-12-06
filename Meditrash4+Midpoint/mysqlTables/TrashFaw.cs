@@ -70,12 +70,12 @@ namespace Meditrash4_Midpoint.mysqlTables
 
         public string valueQuerry()
         {
-            return "(User_rodCislo,Odpad_uid)";
+            return "(@User_rodCislo,@Odpad_uid)";
         }
 
         public string writeQuerry()
         {
-            return "(@User_rodCislo,@Odpad_uid)";
+            return "(User_rodCislo,Odpad_uid)";
         }
     }
 }

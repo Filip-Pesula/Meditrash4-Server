@@ -71,14 +71,15 @@ namespace Meditrash4_Midpoint
 
                             String testName = MySqlHelper.EscapeString(name.Value);
                             List<User> users = mySqlHandle.GetObjectList<User>("name=" + "'" + testName + "'", 2);
-                            if (users.Count == 0)
-                            {
-                                return;
-                            }
+                            XElement body = null;
                             User user = users[0];
                             uint key = processLogin(doc, user);
-                            XElement body = null;
-                            if (key != 0)
+                            if (users.Count == 0)
+                            {
+                                body = new XElement("Login",
+                                   new XElement("uniqueToken", key.ToString("0"))
+                                   );
+                            }else if (key != 0)
                             {
                                 body = new XElement("Login",
                                     new XElement("uniqueToken", key.ToString("X")),
@@ -95,10 +96,11 @@ namespace Meditrash4_Midpoint
                             }
                             XDocument rootDoc = new XDocument(new XDeclaration("1.0", "UTF-8", null), body);
                             Console.WriteLine(rootDoc.ToString());
+                            byte[] ansB = System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString());
                             networkStream.Write(
-                                System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString()),
+                                ansB,
                                 0,
-                                rootDoc.ToString().Length);
+                                ansB.Length);
                             break;
                         }
                     case "Request":
@@ -126,10 +128,11 @@ namespace Meditrash4_Midpoint
                             }
                             XDocument rootDoc = new XDocument(new XDeclaration("1.0","UTF-8",null), response);
                             Console.WriteLine(rootDoc.ToString());
+                            byte[] ansB = System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString());
                             networkStream.Write(
-                                System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString()),
+                                ansB,
                                 0,
-                                rootDoc.ToString().Length);
+                                ansB.Length);
                             break;
                         }
                     default:
@@ -205,15 +208,54 @@ namespace Meditrash4_Midpoint
                         return genIncorrectResponse("addingError", "could not add department");
                     }
                     break;
-                case "addFavItem":
+                case "addItem":
+                    {
+                        string errormsg = "";
+                        try
+                        {
+                            List<Trash> trash = new List<Trash>();
+                            requestCommand.Elements("trash").ToList().ForEach(x => trash.Add(
+                                new Trash(
+                                    int.Parse(x.Element("id").Value),
+                                    x.Element("name").Value,
+                                    int.Parse(x.Element("cathegory").Value),
+                                    int.Parse(x.Element("weight").Value))
+                                ));
+                            trash.ForEach(x =>
+                            {
+                                try
+                                {
+                                    mySqlHandle.saveObject(x);
+                                }
+                                catch(Exception e)
+                                {
+                                    errormsg += "addError" + e.Message + '\n';
+                                }
+                            });
+                            return new XElement("Request", "items were added" + errormsg);
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add item\n"+ errormsg);
+                        }
+                        break;
+                    }
+                case "getItems":
                     {
                         try
                         {
-                            string trashId = requestCommand.Element("id").Value;
-                            List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
-                            TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
-                            mySqlHandle.saveObject(trashFaw);
-                            return new XElement("Request", "item was added");
+                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("true");
+                            XElement ansRoot = new XElement("Request");
+                            foreach (Trash trash in trashList)
+                            {
+                                XElement item = new XElement("item");
+                                item.SetAttributeValue("name", trash.name);
+                                item.SetAttributeValue("id", trash.uid);
+                                item.SetAttributeValue("cathegory", trash.cathegory);
+                                item.SetAttributeValue("weight", trash.weight);
+                                ansRoot.Add(item);
+                            }
+                            return ansRoot;
                         }
                         catch (Exception ex)
                         {
@@ -221,11 +263,39 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
+                case "addFavItem":
+                    {
+                        string errormsg = "";
+                        try
+                        {
+                            requestCommand.Elements("id").ToList().ForEach(x =>
+                            {
+                                string trashId = x.Value;
+                                List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
+                                TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
+                                mySqlHandle.saveObject(trashFaw);
+                                try
+                                {
+                                    mySqlHandle.saveObject(trashFaw);
+                                }
+                                catch (Exception e)
+                                {
+                                    errormsg += "addError" + e.Message + '\n';
+                                }
+                            });
+                            return new XElement("Request", "item was added" + errormsg);
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add item" + errormsg);
+                        }
+                        break;
+                    }
                 case "getFavList":
                     {
                         try
                         {
-                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = " + MySqlHelper.EscapeString(opUser.rod_cislo.ToString()));
+                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = " + MySqlHelper.EscapeString(opUser.rod_cislo.ToString()) + ")");
 
                             XElement ansRoot =  new XElement("Request");
                             foreach(Trash trash in trashList)

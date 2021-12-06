@@ -17,7 +17,20 @@ namespace Meditrash4_Midpoint.mysqlTables
         {
             return "Odpad";
         }
-
+        public Trash()
+        {
+            uid = 0;
+            name = "";
+            cathegory = 0;
+            weight = 0;
+        }
+        public Trash(int uid, string name, int cathegory, int weight )
+        {
+            this.uid = uid;
+            this.name = name;
+            this.cathegory = cathegory;
+            this.weight = weight;
+        }
         public List<KeyValuePair<string, Type>> getMyTypeList()
         {
             List<KeyValuePair<string, Type>> a = new List<KeyValuePair<string, Type>>();
@@ -70,12 +83,12 @@ namespace Meditrash4_Midpoint.mysqlTables
 
         public string valueQuerry()
         {
-            return "(uid,name,category,weight_g)";
+            return "(@uid,@name,@category,@weight_g)";
         }
 
         public string writeQuerry()
         {
-            return "(@uid,@name,@category,@weight_g)";
+            return "(uid,name,category,weight_g)";
         }
     }
 }

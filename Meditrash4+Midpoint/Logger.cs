@@ -34,5 +34,70 @@ namespace Meditrash4_Midpoint
             Console.WriteLine(s);
             Console.ForegroundColor = ConsoleColor.White;
         }
+        public static void MainMenu(int index, bool connectoed)
+        {
+            Console.Clear();
+            drawMenuHeader(true, connectoed);
+            if (index == 0)
+            {
+                drawSelectItem("Nastavení".PadRight(20));
+            }
+            else
+            {
+                drawUnselectItem("Nastavení".PadRight(20));
+            }
+            if (index == 1) { 
+                drawSelectItem("Restartovat".PadRight(20));
+            }
+            else
+            {
+                drawUnselectItem("Restartovat".PadRight(20));
+            }
+            if (index == 2) { 
+                drawSelectItem("Exit".PadRight(20));
+            }
+            else
+            {
+                drawUnselectItem("Exit".PadRight(20));
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
+        public static void drawMenuHeader(bool isRoot,bool connected)
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            if (connected)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("připojeno  ");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("odpojeno   ");
+            }
+            Console.ForegroundColor = ConsoleColor.Blue;
+            if (!isRoot)
+            {
+                Console.Write("<- Esc   ");
+            }
+            else
+            {
+                Console.Write("         ");
+            }
+            Console.Write("\n");
+        }
+        public static void drawUnselectItem(string message, ConsoleColor color = ConsoleColor.White)
+        {
+            Console.ForegroundColor = color;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(message);
+        }
+        public static void drawSelectItem(string message, ConsoleColor color = ConsoleColor.White)
+        {
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = color;
+            Console.WriteLine(message);
+        }
     }
 }

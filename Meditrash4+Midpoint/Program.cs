@@ -9,20 +9,57 @@ namespace Meditrash4_Midpoint
 {
     class Program
     {
+       
         static void Main(string[] args)
         {
             ServerSetup setup = new ServerSetup("confugFile.json");
             string connStr = setup.getConnectionString();
 
-            MySqlHandle mySqlHandle = new MySqlHandle(setup);
+            MySqlHandle mySqlHandle = new MySqlHandle();
 
             AppConnector appConnector = new AppConnector(mySqlHandle);
 
+            menu.Menu menu = new menu.Menu(setup.GetServerData());
+            menu.setConnectCallBack(() =>
+            {
+                mySqlHandle.close();
+                try
+                {
+                    Console.WriteLine("Connecting to MySQL...");
+                    mySqlHandle.connect(setup);
+                    Console.Clear();
+                    menu.setConnected();
+                }
+                catch (Exception ex)
+                {
+                    menu.setNotConnected();
+                    Logger.LogE(ex);
+                }
+            });
+            menu.setResetCallBack(() =>
+            {
+                mySqlHandle.reset();
+            });
+            menu.setSaveCallBack(() =>
+            {
+                setup.save();
+            });
             try
             {
                 Console.WriteLine("Connecting to MySQL...");
-                mySqlHandle.connect();
+                mySqlHandle.connect(setup);
+                Console.Clear();
+                menu.setConnected();
+            }
+            catch (Exception ex)
+            {
+                menu.setNotConnected();
+                Logger.LogE(ex);
+            }
 
+            try
+            {
+                Console.Clear();
 
                 string sql = "SELECT* FROM users";
                 //mySqlHandle.querry(sql,10);
@@ -50,8 +87,12 @@ namespace Meditrash4_Midpoint
             {
                 Logger.LogE(ex);
             }
-            Console.WriteLine("Press Escape to exit");
-            while (Console.ReadKey().Key != ConsoleKey.Escape) { };
+
+            int menuSelectIndex = 0;
+            bool end = false;
+            
+            while (!menu.run()) {
+            };
 
             mySqlHandle.close();
             appConnector.stop();

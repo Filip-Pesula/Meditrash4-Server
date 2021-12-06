@@ -30,6 +30,10 @@ namespace Meditrash4_Midpoint
                 File.WriteAllText(setupFile, jsonTxt);
             }
         }
+        public ServerData GetServerData()
+        {
+            return sData;
+        }
         public string getConnectionString()
         {
             return "server=" + sData.ServerAddres 

@@ -80,12 +80,12 @@ namespace Meditrash4_Midpoint.mysqlTables
 
         public string valueQuerry()
         {
-            return "(storageDate,amount,Odpad_uid,User_rodCislo,DeStoreRecords_uid)";
+            return "(@storageDate,@amount,@Odpad_uid,@User_rodCislo,@DeStoreRecords_uid)";
         }
 
         public string writeQuerry()
         {
-            return "(@storageDate,@amount,@Odpad_uid,@User_rodCislo,@DeStoreRecords_uid)";
+            return "(storageDate,amount,Odpad_uid,User_rodCislo,DeStoreRecords_uid)";
         }
     }
 }
