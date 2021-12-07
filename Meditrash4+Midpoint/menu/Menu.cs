@@ -30,10 +30,12 @@ namespace Meditrash4_Midpoint.menu
         ResetCallBack resetCallBack;
         SaveCallBack saveCallBack;
         TestCallBack testCallBack;
+        SaveCompanyCallBack saveCompanyCallBack;
         public delegate void ConnectCallBack();
         public delegate void ResetCallBack();
         public delegate void SaveCallBack();
         public delegate void TestCallBack();
+        public delegate void SaveCompanyCallBack(string ico,string name,string id,string ulice,string mesto,string psc, string zuj);
         public Menu(ServerData serverData)
         {
             this.serverData = serverData;
@@ -105,6 +107,33 @@ namespace Meditrash4_Midpoint.menu
                                         }
                                         break;
                                     case 3:
+                                        if (connectoed)
+                                        {
+                                            Console.Clear();
+                                            Console.WriteLine("yadejte ICO:");
+                                            string name = Console.readLine();
+                                            Console.Clear();
+                                            Console.WriteLine("yadejte ICO:");
+                                            string ico = Console.readLine();
+                                            Console.Clear();
+                                            Console.WriteLine("yadejte ICO:");
+                                            string id = Console.readLine();
+                                            Console.Clear();
+                                            Console.WriteLine("yadejte ICO:");
+                                            string ulice = Console.readLine();
+                                            Console.Clear();
+                                            Console.WriteLine("yadejte ICO:");
+                                            string mesto = Console.readLine();
+                                            Console.Clear();
+                                            Console.WriteLine("yadejte ICO:");
+                                            string psc = Console.readLine();
+                                            Console.Clear();
+                                            Console.WriteLine("yadejte ICO:");
+                                            string zuj = Console.readLine();
+                                            saveCompanyCallBack(ico,name,id,ulice,mesto,psc,zuj);
+                                        }
+                                        break;
+                                    case 4:
                                         return true;
                                         break;
                                 }

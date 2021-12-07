@@ -208,6 +208,7 @@ namespace Meditrash4_Midpoint
                         return genIncorrectResponse("addingError", "could not add department");
                     }
                     break;
+                    //only extention
                 case "addCathegory":
                     {
                         string errormsg = "";
@@ -341,8 +342,7 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
-                case "getFavList":
-                    {
+                case "getFavList":{
                         try
                         {
                             List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = " + MySqlHelper.EscapeString(opUser.rod_cislo.ToString()) + ")");
@@ -363,21 +363,47 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
-                case "trashItem":
-                    try
-                    {
-                        string trashId = requestCommand.Element("id").Value;
-                        int trashCout = int.Parse(requestCommand.Element("count").Value);
-                        List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
-                        Records record = new Records(trashCout, trash[0].uid,opUser.rod_cislo);
-                        mySqlHandle.saveObject(record);
-                        return new XElement("Request", "record was added");
+                case "trashItem":{
+                        try
+                        {
+                            string trashId = requestCommand.Element("id").Value;
+                            int trashCout = int.Parse(requestCommand.Element("count").Value);
+                            List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
+                            Records record = new Records(trashCout, trash[0].uid,opUser.rod_cislo);
+                            mySqlHandle.saveObject(record);
+                            return new XElement("Request", "record was added");
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add record");
+                        }
+                        break;
                     }
-                    catch (Exception ex)
-                    {
-                        return genIncorrectResponse("addingError", "could not add record");
+                    //only extention
+                case "addRespPerson":{
+                        try
+                        {
+                            long ico = long.parse(requestCommand.Element("ico").Value);
+                            string name = requestCommand.Element("name").Value;
+                            string ulice = requestCommand.Element("ulice").Value;
+                            int cislo_popisne = int.parse(requestCommand.Element("cislo_popisne").Value);
+                            string mesto = requestCommand.Element("mesto").Value;
+                            int psc = int.parse(requestCommand.Element("psc").Value);
+                            int zuj = int.parse(requestCommand.Element("zuj").Value);
+
+
+
+                            RespPerson respPerson = new RespPerson(ico,name,ulice,cislo_popisne,mesto,psc,zuj);
+                            mySqlHandle.saveObject(respPerson);
+                            return new XElement("Request", "respPerson was added");
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add record");
+                        }
+                        break;
                     }
-                    break;
+
 
             }
             return genIncorrectResponse("UnknownCommand", "Unknown Command");

@@ -13,6 +13,7 @@ namespace Meditrash4_Midpoint
         static void Main(string[] args)
         {
             ServerSetup setup = new ServerSetup("confugFile.json");
+            CompanyData companyData = new CompanyData();
             string connStr = setup.getConnectionString();
 
             MySqlHandle mySqlHandle = new MySqlHandle();
