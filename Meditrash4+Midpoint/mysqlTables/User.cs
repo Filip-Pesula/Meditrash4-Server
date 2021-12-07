@@ -77,7 +77,7 @@ namespace Meditrash4_Midpoint
 
 
 
-        public string writeQuerry()
+        public string contentQuerry()
         {
             return "(name,rodCislo,Department_uid,userRights,passwd,firstName,lastName)";
         }

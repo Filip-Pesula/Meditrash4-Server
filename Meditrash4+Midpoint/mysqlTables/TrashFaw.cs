@@ -73,7 +73,7 @@ namespace Meditrash4_Midpoint.mysqlTables
             return "(@User_rodCislo,@Odpad_uid)";
         }
 
-        public string writeQuerry()
+        public string contentQuerry()
         {
             return "(User_rodCislo,Odpad_uid)";
         }

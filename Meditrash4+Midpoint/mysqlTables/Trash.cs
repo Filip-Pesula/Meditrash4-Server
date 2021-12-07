@@ -24,9 +24,9 @@ namespace Meditrash4_Midpoint.mysqlTables
             cathegory = 0;
             weight = 0;
         }
-        public Trash(int uid, string name, int cathegory, int weight )
+        public Trash(string name, int cathegory, int weight )
         {
-            this.uid = uid;
+            this.uid = 0;
             this.name = name;
             this.cathegory = cathegory;
             this.weight = weight;
@@ -36,7 +36,7 @@ namespace Meditrash4_Midpoint.mysqlTables
             List<KeyValuePair<string, Type>> a = new List<KeyValuePair<string, Type>>();
             a.Add(new KeyValuePair<string, Type>("uid", typeof(Int32)));
             a.Add(new KeyValuePair<string, Type>("name", typeof(string)));
-            a.Add(new KeyValuePair<string, Type>("category", typeof(Int32)));
+            a.Add(new KeyValuePair<string, Type>("TrashCathegody_id", typeof(Int32)));
             a.Add(new KeyValuePair<string, Type>("weight_g", typeof(Int32)));
             return a;
         }
@@ -54,9 +54,8 @@ namespace Meditrash4_Midpoint.mysqlTables
         public List<DbVariable> getObjectData()
         {
             List<DbVariable> a = new List<DbVariable>();
-            a.Add(new DbVariable("uid", MySqlDbType.Int32, uid));
             a.Add(new DbVariable("name", MySqlDbType.String, name));
-            a.Add(new DbVariable("category", MySqlDbType.Int32, cathegory));
+            a.Add(new DbVariable("TrashCathegody_id", MySqlDbType.Int32, cathegory));
             a.Add(new DbVariable("weight_g", MySqlDbType.Int32, weight));
             return a;
         }
@@ -83,12 +82,12 @@ namespace Meditrash4_Midpoint.mysqlTables
 
         public string valueQuerry()
         {
-            return "(@uid,@name,@category,@weight_g)";
+            return "(@name,@TrashCathegody_id,@weight_g)";
         }
 
-        public string writeQuerry()
+        public string contentQuerry()
         {
-            return "(uid,name,category,weight_g)";
+            return "(name,TrashCathegody_id,weight_g)";
         }
     }
 }

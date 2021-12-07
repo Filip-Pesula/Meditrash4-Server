@@ -19,7 +19,24 @@ namespace Meditrash4_Midpoint.mysqlTables
         {
             return "Records";
         }
-
+        public Records()
+        {
+            uid = 0;
+            date = DateTime.Now;
+            this.amount = 0;
+            this.Odpad_uid = 0;
+            this.User_rodCislo = 0;
+            this.DeStoreRecords_uid = null;
+        }
+        public Records(int amount, int odpad_uid, long user_rocCislo)
+        {
+            uid = 0;
+            date = DateTime.Now;
+            this.amount = amount;
+            this.Odpad_uid = odpad_uid;
+            this.User_rodCislo = user_rocCislo;
+            DeStoreRecords_uid = null;
+        }
         public List<KeyValuePair<string, Type>> getMyTypeList()
         {
             List<KeyValuePair<string, Type>> a = new List<KeyValuePair<string, Type>>();
@@ -47,12 +64,11 @@ namespace Meditrash4_Midpoint.mysqlTables
         public List<DbVariable> getObjectData()
         {
             List<DbVariable> a = new List<DbVariable>();
-            a.Add(new DbVariable("uid", MySqlDbType.Int32, uid));
             a.Add(new DbVariable("storageDate", MySqlDbType.DateTime, date));
             a.Add(new DbVariable("amount", MySqlDbType.Int32, amount));
             a.Add(new DbVariable("Odpad_uid", MySqlDbType.Int32, Odpad_uid));
             a.Add(new DbVariable("User_rodCislo", MySqlDbType.Int64, User_rodCislo));
-            a.Add(new DbVariable("DeStoreRecords_uid", MySqlDbType.Int32, DeStoreRecords_uid));
+            a.Add(new DbVariable("DeStoreRecords_uid", MySqlDbType.Int64, DeStoreRecords_uid));
             return a;
         }
 
@@ -83,7 +99,7 @@ namespace Meditrash4_Midpoint.mysqlTables
             return "(@storageDate,@amount,@Odpad_uid,@User_rodCislo,@DeStoreRecords_uid)";
         }
 
-        public string writeQuerry()
+        public string contentQuerry()
         {
             return "(storageDate,amount,Odpad_uid,User_rodCislo,DeStoreRecords_uid)";
         }

@@ -29,9 +29,11 @@ namespace Meditrash4_Midpoint.menu
         ConnectCallBack connectCallBack;
         ResetCallBack resetCallBack;
         SaveCallBack saveCallBack;
+        TestCallBack testCallBack;
         public delegate void ConnectCallBack();
         public delegate void ResetCallBack();
         public delegate void SaveCallBack();
+        public delegate void TestCallBack();
         public Menu(ServerData serverData)
         {
             this.serverData = serverData;
@@ -55,6 +57,10 @@ namespace Meditrash4_Midpoint.menu
         {
             this.saveCallBack = saveCallBack;
         }
+        public void setTestCallBack(TestCallBack testCallBack)
+        {
+            this.testCallBack = testCallBack;
+        }
         private bool connectoed = false;
 
         internal void setNotConnected()
@@ -72,7 +78,7 @@ namespace Meditrash4_Midpoint.menu
             {
                 case MenuState.mainMenu:
                     {
-                        Logger.MainMenu(mainMenu.active,connectoed);
+                        mainMenu.draw(mainMenu.active,connectoed);
                         ConsoleKey key = Console.ReadKey(true).Key;
                         switch (key)
                         {
@@ -92,6 +98,13 @@ namespace Meditrash4_Midpoint.menu
                                         menuState = MenuState.resetMenu;
                                         break;
                                     case 2:
+                                        if (connectoed)
+                                        {
+                                            Console.Clear();
+                                            testCallBack();
+                                        }
+                                        break;
+                                    case 3:
                                         return true;
                                         break;
                                 }
@@ -231,6 +244,8 @@ namespace Meditrash4_Midpoint.menu
                                     case 1:
                                         if (connectoed)
                                         {
+                                            Console.Clear();
+                                            Console.WriteLine("Tímto nastavením uplně vymažete obsah databáze, jste si jsití?");
                                             Console.WriteLine("Resetovat Databázy: y/n");
                                             bool reset = false;
                                             bool end = false;

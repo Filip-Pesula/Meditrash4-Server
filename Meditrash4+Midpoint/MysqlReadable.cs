@@ -15,7 +15,7 @@ namespace Meditrash4_Midpoint
         List<KeyValuePair<string,Type>> getMyTypeList();
         List<DbVariable> getObjectData();
         void setMyData(List<Object> data);
-        string writeQuerry();
+        string contentQuerry();
         public string valueQuerry();
         List<Object> getMyValues();
         string getMyName();

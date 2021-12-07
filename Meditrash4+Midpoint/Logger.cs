@@ -34,35 +34,6 @@ namespace Meditrash4_Midpoint
             Console.WriteLine(s);
             Console.ForegroundColor = ConsoleColor.White;
         }
-        public static void MainMenu(int index, bool connectoed)
-        {
-            Console.Clear();
-            drawMenuHeader(true, connectoed);
-            if (index == 0)
-            {
-                drawSelectItem("Nastavení".PadRight(20));
-            }
-            else
-            {
-                drawUnselectItem("Nastavení".PadRight(20));
-            }
-            if (index == 1) { 
-                drawSelectItem("Restartovat".PadRight(20));
-            }
-            else
-            {
-                drawUnselectItem("Restartovat".PadRight(20));
-            }
-            if (index == 2) { 
-                drawSelectItem("Exit".PadRight(20));
-            }
-            else
-            {
-                drawUnselectItem("Exit".PadRight(20));
-            }
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Black;
-        }
         public static void drawMenuHeader(bool isRoot,bool connected)
         {
             Console.BackgroundColor = ConsoleColor.Black;

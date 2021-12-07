@@ -44,6 +44,26 @@ namespace Meditrash4_Midpoint
             {
                 setup.save();
             });
+
+            menu.setTestCallBack(() => {
+                List<string> errorList = mySqlHandle.checkSql();
+                if (errorList.Count == 0)
+                {
+                    Logger.Log("All Tabs Correct",ConsoleColor.Green);
+                }
+                else{
+                    Logger.Log("Tabs Error", ConsoleColor.Red);
+                    errorList.ForEach((x) =>
+                    {
+                        Logger.Log(x, ConsoleColor.Red);
+                    });
+                }
+                Logger.Log("Press Enter");
+                while (Console.ReadKey(true).Key != ConsoleKey.Enter)
+                {
+
+                }
+            });
             try
             {
                 Console.WriteLine("Connecting to MySQL...");

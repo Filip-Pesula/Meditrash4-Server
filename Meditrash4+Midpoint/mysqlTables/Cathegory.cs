@@ -1,37 +1,40 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Meditrash4_Midpoint.mysqlTables
 {
-    internal class Department : MysqlReadable
+    internal class Cathegory : MysqlReadable
     {
         public int id { get; private set; }
         public string name { get; private set; }
-        public Department(string name)
+        public Cathegory(int id,string name)
         {
+            this.id = id;
             this.name = name;
-            this.id = 0;
         }
-        public Department()
+        public Cathegory()
         {
-            this.name = "";
             this.id = 0;
+            this.name = "";
+        }
+        public string contentQuerry()
+        {
+            return "(id,name)";
         }
 
         public string getMyName()
         {
-            return "Department";
+            return "TrashCathegody";
         }
-        
 
         public List<KeyValuePair<string, Type>> getMyTypeList()
         {
-            List<KeyValuePair<string, Type>> a = new  List<KeyValuePair<string, Type>>();
-            a.Add(new KeyValuePair<string, Type>("uid", typeof(Int32)));
+            List<KeyValuePair<string, Type>> a = new List<KeyValuePair<string, Type>>();
+            a.Add(new KeyValuePair<string, Type>("id", typeof(Int32)));
             a.Add(new KeyValuePair<string, Type>("name", typeof(string)));
             return a;
         }
@@ -39,6 +42,7 @@ namespace Meditrash4_Midpoint.mysqlTables
         public List<object> getMyValues()
         {
             List<object> a = new List<object>();
+            a.Add(id);
             a.Add(name);
             return a;
         }
@@ -46,7 +50,7 @@ namespace Meditrash4_Midpoint.mysqlTables
         public List<DbVariable> getObjectData()
         {
             List<DbVariable> a = new List<DbVariable>();
-            a.Add(new DbVariable("uid",MySqlDbType.Int32,id));
+            a.Add(new DbVariable("uid", MySqlDbType.Int32, id));
             a.Add(new DbVariable("name", MySqlDbType.String, name));
             return a;
         }
@@ -65,17 +69,12 @@ namespace Meditrash4_Midpoint.mysqlTables
             }
             catch (Exception e)
             {
-                throw new UnmatchingTypeListException("User data format not correct", e);
+                throw new UnmatchingTypeListException("Cathegory data format not correct", e);
             }
-        }
-
-        public string contentQuerry()
-        {
-            return "(name)";
         }
         public string valueQuerry()
         {
-            return "(@name)";
+            return "(@id,@name)";
         }
     }
 }

@@ -208,6 +208,57 @@ namespace Meditrash4_Midpoint
                         return genIncorrectResponse("addingError", "could not add department");
                     }
                     break;
+                case "addCathegory":
+                    {
+                        string errormsg = "";
+                        try
+                        {
+                            List<Cathegory> cathegories = new List<Cathegory>();
+                            requestCommand.Elements("cathegory").ToList().ForEach(x => cathegories.Add(
+                                new Cathegory(
+                                    int.Parse(x.Element("id").Value),
+                                    x.Element("name").Value)
+                                ));
+                            cathegories.ForEach(x =>
+                            {
+                                try
+                                {
+                                    mySqlHandle.saveObject(x);
+                                }
+                                catch (Exception e)
+                                {
+                                    errormsg += "addError" + e.Message + '\n';
+                                }
+                            });
+                            return new XElement("Request", "cathegory were added" + errormsg);
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add cathegory\n" + errormsg);
+                        }
+                        break;
+                    }
+                case "getCathegories":
+                    {
+                        try
+                        {
+                            List<Cathegory> trashList = mySqlHandle.GetObjectList<Cathegory>("true");
+                            XElement ansRoot = new XElement("Request");
+                            foreach (Cathegory cathegory in trashList)
+                            {
+                                XElement item = new XElement("cathegory");
+                                item.SetAttributeValue("name", cathegory.name);
+                                item.SetAttributeValue("id", cathegory.id);
+                                ansRoot.Add(item);
+                            }
+                            return ansRoot;
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add item");
+                        }
+                        break;
+                    }
                 case "addItem":
                     {
                         string errormsg = "";
@@ -216,7 +267,6 @@ namespace Meditrash4_Midpoint
                             List<Trash> trash = new List<Trash>();
                             requestCommand.Elements("trash").ToList().ForEach(x => trash.Add(
                                 new Trash(
-                                    int.Parse(x.Element("id").Value),
                                     x.Element("name").Value,
                                     int.Parse(x.Element("cathegory").Value),
                                     int.Parse(x.Element("weight").Value))
@@ -317,14 +367,15 @@ namespace Meditrash4_Midpoint
                     try
                     {
                         string trashId = requestCommand.Element("id").Value;
+                        int trashCout = int.Parse(requestCommand.Element("count").Value);
                         List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
-                        TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
-                        mySqlHandle.saveObject(trashFaw);
-                        return new XElement("Request", "item was added");
+                        Records record = new Records(trashCout, trash[0].uid,opUser.rod_cislo);
+                        mySqlHandle.saveObject(record);
+                        return new XElement("Request", "record was added");
                     }
                     catch (Exception ex)
                     {
-                        return genIncorrectResponse("addingError", "could not add item");
+                        return genIncorrectResponse("addingError", "could not add record");
                     }
                     break;
 
