@@ -13,7 +13,7 @@ namespace Meditrash4_Midpoint
         static void Main(string[] args)
         {
             ServerSetup setup = new ServerSetup("confugFile.json");
-            CompanyData companyData = new CompanyData();
+            CompanyDataWrapper companyData = new CompanyDataWrapper();
             string connStr = setup.getConnectionString();
 
             MySqlHandle mySqlHandle = new MySqlHandle();
@@ -64,6 +64,16 @@ namespace Meditrash4_Midpoint
                 {
 
                 }
+            });
+            menu.setSaveCompanyCallBack((string ico, string name, string id, string ulice, string mesto, string psc, string zuj) => {
+                companyData._data.ico = ico;
+                companyData._data.name = name;
+                companyData._data.id = id;
+                companyData._data.ulice = ulice;
+                companyData._data.mesto = mesto;
+                companyData._data.psc = psc;
+                companyData._data.zuj = zuj;
+                companyData.save();
             });
             try
             {

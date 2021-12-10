@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.IO;
 
 namespace Meditrash4_Midpoint
 {
     class CompanyData
     {
-        public static COMPANY_FILE_NAME = "companyData.json";
+        public static string COMPANY_FILE_NAME = "companyData.json";
         public string ico { get; set; }
         public string name { get; set; }
         public string id { get; set; }
@@ -19,20 +20,13 @@ namespace Meditrash4_Midpoint
         public string zuj { get; set; }
         public CompanyData()
         {
-            JsonDocument doc;
-            sData = new ServerData();
-            if (File.Exists(companyData))
-            {
-                string jsonTxt = File.ReadAllText(companyData);
-                doc = JsonDocument.Parse(jsonTxt);
-                CompanyData = JsonSerializer.Deserialize<ServerData>(jsonTxt);
-            }
-            else
-            {
-                string jsonTxt = JsonSerializer.Serialize(CompanyData);
-                File.WriteAllText(companyData, jsonTxt);
-            }
-        
+            ico = "";
+            name = "";
+            id = "";
+            ulice = "";
+            mesto = "";
+            psc = "";
+            zuj = "";
         }
         public CompanyData(JsonDocument doc)
         {
@@ -43,13 +37,7 @@ namespace Meditrash4_Midpoint
             ulice = root.GetProperty("ulice").GetString();
             mesto = root.GetProperty("mesto").GetString();
             psc = root.GetProperty("psc").GetString();
-            yuj = root.GetProperty("yuj").GetString();
-        }
-        
-        public void save()
-        {
-            string jsonTxt = JsonSerializer.Serialize(sData);
-            File.WriteAllText(COMPANY_FILE_NAME, jsonTxt);
+            zuj = root.GetProperty("yuj").GetString();
         }
     }
 }

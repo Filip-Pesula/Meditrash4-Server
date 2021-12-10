@@ -383,17 +383,55 @@ namespace Meditrash4_Midpoint
                 case "addRespPerson":{
                         try
                         {
-                            long ico = long.parse(requestCommand.Element("ico").Value);
+                            long ico = long.Parse(requestCommand.Element("ico").Value);
                             string name = requestCommand.Element("name").Value;
                             string ulice = requestCommand.Element("ulice").Value;
-                            int cislo_popisne = int.parse(requestCommand.Element("cislo_popisne").Value);
+                            int cislo_popisne = int.Parse(requestCommand.Element("cislo_popisne").Value);
                             string mesto = requestCommand.Element("mesto").Value;
-                            int psc = int.parse(requestCommand.Element("psc").Value);
-                            int zuj = int.parse(requestCommand.Element("zuj").Value);
+                            int psc = int.Parse(requestCommand.Element("psc").Value);
+                            int zuj = int.Parse(requestCommand.Element("zuj").Value);
 
 
 
                             RespPerson respPerson = new RespPerson(ico,name,ulice,cislo_popisne,mesto,psc,zuj);
+                            mySqlHandle.saveObject(respPerson);
+                            return new XElement("Request", "respPerson was added");
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add record");
+                        }
+                        break;
+                    }
+                case "exportTrashByCathegory":
+                    {
+                        try
+                        {
+                            XElement respPerson = requestCommand.Element("respPerson");
+                            int respPersonIco = int.Parse(respPerson.Element("ico").Value);
+                            List<RespPerson> respPerson1 = mySqlHandle.GetObjectList<RespPerson>("ico = " + respPersonIco.ToString());
+                            if (respPerson1.Count == 0)
+                                throw new Exception("Resp person does not exist");
+                            requestCommand.Elements("cathegory").ToList().ForEach(cathegory =>
+                            {
+                                int intVal = int.Parse(cathegory.Element("id").Value);
+                                List<Cathegory> cathegory1 = mySqlHandle.GetObjectList<Cathegory>("id = " + intVal.ToString());
+                                if (cathegory1.Count == 0)
+                                    return;
+                                
+                                ExportRecords exportRecords = new ExportRecords();
+                            });
+                            long ico = long.Parse(requestCommand.Element("ico").Value);
+                            string name = requestCommand.Element("name").Value;
+                            string ulice = requestCommand.Element("ulice").Value;
+                            int cislo_popisne = int.Parse(requestCommand.Element("cislo_popisne").Value);
+                            string mesto = requestCommand.Element("mesto").Value;
+                            int psc = int.Parse(requestCommand.Element("psc").Value);
+                            int zuj = int.Parse(requestCommand.Element("zuj").Value);
+
+
+
+                            RespPerson respPerson = new RespPerson(ico, name, ulice, cislo_popisne, mesto, psc, zuj);
                             mySqlHandle.saveObject(respPerson);
                             return new XElement("Request", "respPerson was added");
                         }
