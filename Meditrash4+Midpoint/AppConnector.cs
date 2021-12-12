@@ -72,28 +72,33 @@ namespace Meditrash4_Midpoint
                             String testName = MySqlHelper.EscapeString(name.Value);
                             List<User> users = mySqlHandle.GetObjectList<User>("name=" + "'" + testName + "'", 2);
                             XElement body = null;
-                            User user = users[0];
-                            uint key = processLogin(doc, user);
+
                             if (users.Count == 0)
                             {
                                 body = new XElement("Login",
-                                   new XElement("uniqueToken", key.ToString("0"))
-                                   );
-                            }else if (key != 0)
-                            {
-                                body = new XElement("Login",
-                                    new XElement("uniqueToken", key.ToString("X")),
-                                    new XElement("firstName", user.firstName),
-                                    new XElement("lastName", user.lastName),
-                                    new XElement("rights", user.rights)
-                                    );
+                                    new XElement("uniqueToken", "0"));
                             }
                             else
                             {
-                                body = new XElement("Login",
-                                   new XElement("uniqueToken", key.ToString("0"))
-                                   );
+                                User user = users[0];
+                                uint key = processLogin(doc, user);
+                                if (key != 0)
+                                {
+                                    body = new XElement("Login",
+                                        new XElement("uniqueToken", key.ToString("X")),
+                                        new XElement("firstName", user.firstName),
+                                        new XElement("lastName", user.lastName),
+                                        new XElement("rights", user.rights)
+                                        );
+                                }
+                                else
+                                {
+                                    body = new XElement("Login",
+                                        new XElement("uniqueToken", "0")
+                                        );
+                                }
                             }
+                                
                             XDocument rootDoc = new XDocument(new XDeclaration("1.0", "UTF-8", null), body);
                             Console.WriteLine(rootDoc.ToString());
                             byte[] ansB = System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString());
@@ -119,8 +124,7 @@ namespace Meditrash4_Midpoint
                             if(user == null)
                             {
                                 response = new XElement("RequestError",
-                                        "wrong Login"
-                                    );
+                                        "wrong Login");
                             }
                             else
                             {
@@ -208,7 +212,26 @@ namespace Meditrash4_Midpoint
                         return genIncorrectResponse("addingError", "could not add department");
                     }
                     break;
-                    //only extention
+                case "getDepartments":
+                    try
+                    {
+                        List<Department> departmentList = mySqlHandle.GetObjectList<Department>("true");
+                        XElement ansRoot = new XElement("Request");
+                        foreach (Department department in departmentList)
+                        {
+                            XElement item = new XElement("deepartment");
+                            item.SetAttributeValue("name", department.name);
+                            item.SetAttributeValue("id", department.id);
+                            ansRoot.Add(item);
+                        }
+                        return ansRoot;
+                    }
+                    catch (Exception ex)
+                    {
+                        return genIncorrectResponse("addingError", "could not get department List");
+                    }
+                    break;
+                //only extention
                 case "addCathegory":
                     {
                         string errormsg = "";
@@ -348,7 +371,10 @@ namespace Meditrash4_Midpoint
                             List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = " + MySqlHelper.EscapeString(opUser.rod_cislo.ToString()) + ")");
 
                             XElement ansRoot =  new XElement("Request");
-                            foreach(Trash trash in trashList)
+                            XElement reqCommand = new XElement("RequestCommand");
+                            reqCommand.SetAttributeValue("name", "getFavList");
+                            ansRoot.Add(reqCommand);
+                            foreach (Trash trash in trashList)
                             {
                                 XElement item = new XElement("item");
                                 item.SetAttributeValue("name", trash.name);
@@ -418,16 +444,10 @@ namespace Meditrash4_Midpoint
                                 List<Cathegory> cathegory1 = mySqlHandle.GetObjectList<Cathegory>("id = " + intVal.ToString());
                                 if (cathegory1.Count == 0)
                                     return;
-                                
-                                ExportRecords exportRecords = new ExportRecords();
+                                ExportRecords exportRecords = new ExportRecords(respPerson1[0].ico);
+                                mySqlHandle.saveObject(exportRecords);
+                                //mySqlHandle.querry("U");
                             });
-                            long ico = long.Parse(requestCommand.Element("ico").Value);
-                            string name = requestCommand.Element("name").Value;
-                            string ulice = requestCommand.Element("ulice").Value;
-                            int cislo_popisne = int.Parse(requestCommand.Element("cislo_popisne").Value);
-                            string mesto = requestCommand.Element("mesto").Value;
-                            int psc = int.Parse(requestCommand.Element("psc").Value);
-                            int zuj = int.Parse(requestCommand.Element("zuj").Value);
                         }
                         catch (Exception ex)
                         {

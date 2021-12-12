@@ -365,7 +365,7 @@ ALTER TABLE User ADD CONSTRAINT User_Department FOREIGN KEY User_Department (Dep
 
 ", conn);
             cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand(@"insert into user
+            cmd = new MySqlCommand(@"insert into User
 values(254751000,2,'root','ROOT','admin',unhex(SHA2('root',256)),null);", conn);
             cmd.ExecuteNonQuery();
             cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180101,'Ostré předměty');", conn);
