@@ -13,7 +13,8 @@ namespace Meditrash4_Midpoint.menu
         {
             mainMenu,
             settingMenu,
-            resetMenu
+            resetMenu,
+            settingCompanyMenu
         }
         enum SettingState
         {
@@ -22,28 +23,36 @@ namespace Meditrash4_Midpoint.menu
         }
         MainMenu mainMenu;
         SettingsMenu settingsMenu;
+        CompanySettingsMenu companySettingsMenu;
         ResetMenu resetMenu;
+
         MenuState menuState;
         SettingState settingState;
+
         ServerData serverData;
+        CompanyData companyData;
+
+        //callbacks
         ConnectCallBack connectCallBack;
         ResetCallBack resetCallBack;
         SaveCallBack saveCallBack;
         TestCallBack testCallBack;
         SaveCompanyCallBack saveCompanyCallBack;
+
         public delegate void ConnectCallBack();
         public delegate void ResetCallBack();
         public delegate void SaveCallBack();
         public delegate void TestCallBack();
-        public delegate void SaveCompanyCallBack(string ico,string name,string id,string ulice,string mesto,string psc, string zuj);
-        public Menu(ServerData serverData)
+        public delegate void SaveCompanyCallBack();
+        public Menu(ServerData serverData, CompanyData companyData)
         {
             this.serverData = serverData;
-            
+            this.companyData = companyData;
             menuState = MenuState.mainMenu;
             settingState = SettingState.choiceState;
             mainMenu = new MainMenu();
             settingsMenu = new SettingsMenu(serverData);
+            companySettingsMenu = new CompanySettingsMenu(companyData);
             resetMenu = new ResetMenu();
         }
 
@@ -104,40 +113,9 @@ namespace Meditrash4_Midpoint.menu
                                         menuState = MenuState.resetMenu;
                                         break;
                                     case 2:
-                                        if (connectoed)
-                                        {
-                                            Console.Clear();
-                                            testCallBack();
-                                        }
+                                        menuState = MenuState.settingCompanyMenu;
                                         break;
                                     case 3:
-                                        if (connectoed)
-                                        {
-                                            Console.Clear();
-                                            Console.WriteLine("zadejte ICO:");
-                                            string ico = Console.ReadLine();
-                                            Console.Clear();
-                                            Console.WriteLine("zadejte Name:");
-                                            string name = Console.ReadLine();
-                                            Console.Clear();
-                                            Console.WriteLine("zadejte ID:");
-                                            string id = Console.ReadLine();
-                                            Console.Clear();
-                                            Console.WriteLine("zadejte Ulice:");
-                                            string ulice = Console.ReadLine();
-                                            Console.Clear();
-                                            Console.WriteLine("yadejte Mesto:");
-                                            string mesto = Console.ReadLine();
-                                            Console.Clear();
-                                            Console.WriteLine("yadejte PSC:");
-                                            string psc = Console.ReadLine();
-                                            Console.Clear();
-                                            Console.WriteLine("yadejte ZUJ:");
-                                            string zuj = Console.ReadLine();
-                                            saveCompanyCallBack(ico,name,id,ulice,mesto,psc,zuj);
-                                        }
-                                        break;
-                                    case 4:
                                         return true;
                                         break;
                                 }
@@ -232,6 +210,143 @@ namespace Meditrash4_Midpoint.menu
                                                         {
                                                             serverData.Password = ins;
                                                             saveCallBack();
+                                                        }
+                                                        break;
+                                                    }
+                                            }
+                                            break;
+                                        case ConsoleKey.Escape:
+                                            menuState = MenuState.mainMenu;
+                                            break;
+                                    }
+                                }
+                                break;
+                            case SettingState.inputState:
+                                {
+                                    Console.Clear();
+                                    bool end = false;
+                                    Console.WriteLine("Vložte nastavení:");
+                                    string mline = Console.ReadLine();
+                                    settingState = SettingState.choiceState;
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
+                case MenuState.settingCompanyMenu:
+                    {
+                        companySettingsMenu.draw(connectoed);
+                        switch (settingState) {
+                            case SettingState.choiceState:
+                                {
+                                    ConsoleKey key = Console.ReadKey(true).Key;
+                                    switch (key)
+                                    {
+                                        case ConsoleKey.DownArrow:
+                                            companySettingsMenu.down();
+                                            break;
+                                        case ConsoleKey.UpArrow:
+                                            companySettingsMenu.up();
+                                            break;
+                                        case ConsoleKey.Enter:
+                                            switch (companySettingsMenu.active)
+                                            {
+                                                case 0:
+                                                    {
+                                                        string ins = input();
+                                                        if (ins == null)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            companyData.ico = ins;
+                                                            saveCompanyCallBack();
+                                                        }
+                                                        break;
+                                                    }
+                                                case 1:
+                                                    {
+                                                        string ins = input();
+                                                        if (ins == null)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            companyData.name = ins;
+                                                            saveCompanyCallBack();
+                                                        }
+                                                        break;
+                                                    }
+                                                case 2:
+                                                    {
+                                                        string ins = input();
+                                                        if (ins == null)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            companyData.id = ins;
+                                                            saveCompanyCallBack();
+                                                        }
+                                                        break;
+                                                    }
+                                                case 3:
+                                                    {
+                                                        string ins = input();
+                                                        if (ins == null)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            companyData.ulice = ins;
+                                                            saveCompanyCallBack();
+                                                        }
+                                                        break;
+                                                    }
+                                                case 4:
+                                                    {
+                                                        string ins = input();
+                                                        if (ins == null)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            companyData.mesto = ins;
+                                                            saveCompanyCallBack();
+                                                        }
+                                                        break;
+                                                    }
+                                                case 5:
+                                                    {
+                                                        string ins = input();
+                                                        if (ins == null)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            companyData.psc = ins;
+                                                            saveCompanyCallBack();
+                                                        }
+                                                        break;
+                                                    }
+                                                case 6:
+                                                    {
+                                                        string ins = input();
+                                                        if (ins == null)
+                                                        {
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            companyData.zuj = ins;
+                                                            saveCompanyCallBack();
                                                         }
                                                         break;
                                                     }

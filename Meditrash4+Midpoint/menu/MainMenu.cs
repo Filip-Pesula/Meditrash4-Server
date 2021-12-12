@@ -8,7 +8,7 @@ namespace Meditrash4_Midpoint.menu
 {
     internal class MainMenu
     {
-        public const int ITEM_COUNT = 5;
+        public const int ITEM_COUNT = 4;
         public int active { get; private set; }
 
         public MainMenu()
@@ -45,21 +45,6 @@ namespace Meditrash4_Midpoint.menu
                 Logger.drawUnselectItem("Restartovat".PadRight(20));
             }
             if (index == 2)
-            {
-                if (connectoed)
-                    Logger.drawSelectItem("TestDatabase".PadRight(20));
-                else
-                    Logger.drawSelectItem("TestDatabase".PadRight(20), ConsoleColor.Gray);
-            }
-            else
-            {
-
-                if (connectoed)
-                    Logger.drawUnselectItem("TestDatabase".PadRight(20));
-                else
-                    Logger.drawUnselectItem("TestDatabase".PadRight(20), ConsoleColor.Gray);
-            }
-            if (index == 3)
             {
                 Logger.drawSelectItem("Nastavení dat firmy".PadRight(20));
             }

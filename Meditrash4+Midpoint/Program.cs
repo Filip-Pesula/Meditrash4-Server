@@ -20,7 +20,7 @@ namespace Meditrash4_Midpoint
 
             AppConnector appConnector = new AppConnector(mySqlHandle);
 
-            menu.Menu menu = new menu.Menu(setup.GetServerData());
+            menu.Menu menu = new menu.Menu(setup.GetServerData(),companyData._data);
             menu.setConnectCallBack(() =>
             {
                 mySqlHandle.close();
@@ -65,14 +65,7 @@ namespace Meditrash4_Midpoint
 
                 }
             });
-            menu.setSaveCompanyCallBack((string ico, string name, string id, string ulice, string mesto, string psc, string zuj) => {
-                companyData._data.ico = ico;
-                companyData._data.name = name;
-                companyData._data.id = id;
-                companyData._data.ulice = ulice;
-                companyData._data.mesto = mesto;
-                companyData._data.psc = psc;
-                companyData._data.zuj = zuj;
+            menu.setSaveCompanyCallBack(() => {
                 companyData.save();
             });
             try

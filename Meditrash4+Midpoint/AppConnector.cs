@@ -428,12 +428,6 @@ namespace Meditrash4_Midpoint
                             string mesto = requestCommand.Element("mesto").Value;
                             int psc = int.Parse(requestCommand.Element("psc").Value);
                             int zuj = int.Parse(requestCommand.Element("zuj").Value);
-
-
-
-                            RespPerson respPerson = new RespPerson(ico, name, ulice, cislo_popisne, mesto, psc, zuj);
-                            mySqlHandle.saveObject(respPerson);
-                            return new XElement("Request", "respPerson was added");
                         }
                         catch (Exception ex)
                         {
@@ -441,8 +435,6 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
-
-
             }
             return genIncorrectResponse("UnknownCommand", "Unknown Command");
         }
