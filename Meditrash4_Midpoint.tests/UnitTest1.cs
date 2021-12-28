@@ -3,6 +3,12 @@ using Meditrash4_Midpoint;
 using System.Runtime.CompilerServices;
 using System;
 using Xunit.Abstractions;
+using MySql.Data.MySqlClient;
+using TypeMock.Internal;
+using TypeMock.ArrangeActAssert;
+using Moq;
+using Autofac;
+using Autofac.Extras.Moq;
 
 [assembly:InternalsVisibleTo("Meditrash4_Midpoint.tests")]
 
@@ -25,5 +31,24 @@ namespace Meditrash4_Midpoint.tests
             MySqlHandle.fillSelectCommandParamQ(ref cmd, user);
             _testOutputHelper.WriteLine(cmd.CommandText);
         }
+        
+
+        [Fact]
+        public void _Test_DeleteObject()
+        {
+            MySqlCommand cmd1 = new MySqlCommand();
+            cmd1.CommandText = MySqlHandle.genKeySelectCond(new mysqlTables.Cathegory(16, "jip"),cmd1);
+            cmd1.Prepare();
+            Assert.Equal("id = 16", cmd1.CommandText); 
+            /*
+            Assert.Equal("uid = 0", MySqlHandle.genKeySelectCond(new mysqlTables.Department("jip")));
+            Assert.Equal("uid = 147520", MySqlHandle.genKeySelectCond(new mysqlTables.ExportRecords(147520)));
+            Assert.Equal("uid = 0", MySqlHandle.genKeySelectCond(new mysqlTables.Records(10,5,10)));
+            */
+
+
+        }
+
+
     }
 }

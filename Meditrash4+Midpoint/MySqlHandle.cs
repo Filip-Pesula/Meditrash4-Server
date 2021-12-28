@@ -13,7 +13,7 @@ namespace Meditrash4_Midpoint
     class MySqlHandle
     {
         private static object connLock = new object();
-        MySqlConnection conn;
+        private MySqlConnection conn { get; set; }
         public MySqlHandle()
         {
             conn = new MySqlConnection();
@@ -402,6 +402,46 @@ values(254751000,2,'root','ROOT','admin',unhex(SHA2('root',256)),null);", conn);
             cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180208,'Jiná nepoužitelná léčiva neuvedená pod číslem 18 02 07');", conn);
             cmd.ExecuteNonQuery();
 
+        }
+        public static string genKeySelectCond<T>(T _object, MySqlCommand cmd) where T : MysqlReadable
+        {
+            string cond = "";
+            List<DbVariable> vallist = _object.getObjectData();
+            int k = 0;
+            foreach (int obj in _object.getPrimaryIndex())
+            {
+                cond += vallist[obj].name + " = @" + "cond" + k + " AND";
+                cmd.Parameters.Add('@' + "cond"+k, vallist[obj].type).Value = vallist[obj].value;
+            
+            }
+            cond = cond.Remove(cond.Length - 4);
+            return cond;
+        }
+        internal void removeObject<T>(T _object) where T : MysqlReadable
+        {
+            Exception e = null;
+            MySqlCommand cmd = new MySqlCommand("", conn);
+            string cond = genKeySelectCond(_object,cmd);
+            Monitor.Enter(connLock);
+            try
+            {
+                cmd.CommandText = "DELETE FROM " + _object.getMyName() + " WHERE "+ cond + ";";
+                fillSelectCommandParamQ(ref cmd, _object);
+                int execution = cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+            }
+            finally
+            {
+                Monitor.Exit(connLock);
+            }
+
+            if (e != null)
+            {
+                throw e;
+            }
         }
     }
     

@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExcelLibrary" Version="1.2011.7.31" />
     <PackageReference Include="MySql.Data" Version="8.0.27" />
   </ItemGroup>
 

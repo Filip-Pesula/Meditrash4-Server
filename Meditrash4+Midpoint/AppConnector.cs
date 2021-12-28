@@ -94,8 +94,7 @@ namespace Meditrash4_Midpoint
                                 else
                                 {
                                     body = new XElement("Login",
-                                        new XElement("uniqueToken", "0")
-                                        );
+                                        new XElement("uniqueToken", "0"));
                                 }
                             }
                                 
@@ -142,7 +141,6 @@ namespace Meditrash4_Midpoint
                     default:
                         break;
                 }
-                
             }
             
             catch (Exception e)
@@ -161,7 +159,6 @@ namespace Meditrash4_Midpoint
 
         private XElement processRequest(XDocument doc, User opUser)
         {
-            XElement response;
             XElement requestCommand = doc.Root.Element("requestCommand");
             XAttribute commandName = requestCommand.Attribute("name");
             switch (commandName.Value)
@@ -212,6 +209,30 @@ namespace Meditrash4_Midpoint
                         return genIncorrectResponse("addingError", "could not add department");
                     }
                     break;
+                case "removeDepartment":
+                    {
+                        if (opUser.rights < 2)
+                        {
+                            return genIncorrectResponse("notPermitted", "not Permitted to this operation");
+                        }
+                        XElement nameEl = requestCommand.Element("name");
+                        if (nameEl == null)
+                        {
+                            return genIncorrectResponse("missingArgument", "missing name");
+                        }
+                        String name = nameEl.Value;
+                        try
+                        {
+                            Department department = mySqlHandle.GetObjectList<Department>("name = " + MySqlHelper.EscapeString(name))[0];
+                            mySqlHandle.removeObject(department);
+                            return new XElement("Request", "department was Added");
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("removingError", "could not add department");
+                        }
+                        break;
+                    }
                 case "getDepartments":
                     try
                     {
