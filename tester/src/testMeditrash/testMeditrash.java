@@ -167,6 +167,29 @@ public class testMeditrash {
             );
             System.out.println();
 
+            XElement rootTrashItem1 = new XElement("Request",
+                    new XElement("uniqueToken",tokenLoginJosef),
+                    new XElement("requestCommand",
+                            new XElement("id","1"),
+                            new XElement("count","5")
+                    )
+            );
+            rootTrashItem1.children.get(1).setAttribute("name","trashItem");
+            XElement rootTrashItem2 = new XElement("Request",
+                    new XElement("uniqueToken",tokenLoginJosef),
+                    new XElement("requestCommand",
+                            new XElement("id","1"),
+                            new XElement("count","3")
+                    )
+            );
+            rootTrashItem2.children.get(1).setAttribute("name","trashItem");
+            sendReadMsg(
+                    XmlWriter.createDoc(rootTrashItem1)
+            );
+            sendReadMsg(
+                    XmlWriter.createDoc(rootTrashItem2)
+            );
+
 
         } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
             e.printStackTrace();

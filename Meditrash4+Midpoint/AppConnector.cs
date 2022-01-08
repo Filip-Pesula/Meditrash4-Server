@@ -92,15 +92,12 @@ namespace Meditrash4_Midpoint
 
                                 if (key != 0)
                                 {
-                                    body = genIncorrectResponse("incorrectName", "department has incorrect name");
-                                }
-                                else if (key != 0)
-                                {
                                     body = new XElement("Login",
                                         new XElement("uniqueToken", key.ToString("X")),
                                         new XElement("firstName", user.firstName),
                                         new XElement("lastName", user.lastName),
-                                        new XElement("department", departments[0]).Name,
+                                        new XElement("userName", user.userName),
+                                        new XElement("department", departments[0]),
                                         new XElement("rodCislo", user.rod_cislo),
                                         new XElement("rights", user.rights)
                                         );
@@ -440,6 +437,44 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
+                case "getTrashItem":
+                    {
+                        try
+                        {
+
+                            DateTime time = new DateTime(
+                                int.Parse(requestCommand.Element("year").Value), 
+                                int.Parse(requestCommand.Element("month").Value),
+                                int.Parse(requestCommand.Element("day").Value));
+                             var data = mySqlHandle.querry(
+                                @"select records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from records 
+	                                LEFT JOIN odpad Rec_Odp on records.Odpad_uid = Rec_Odp.uid 
+                                    LEFT JOIN user Rec_Odp_User on Rec_Odp_User.rodCislo = records.User_rodCislo
+                                    LEFT JOIN trashcathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
+		                                where storageDate > @date"
+                            ,new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> {  new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@date", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Date, time))  } );
+                            //time.ToString("yyyy-mm-dd")
+                            XElement ansRoot = new XElement("Request");
+                            data.ForEach(row =>
+                            {
+                                XElement item = new XElement("record");
+                                item.SetAttributeValue("recordId", row[0].Value);
+                                item.SetAttributeValue("cathegoryId", row[1].Value);
+                                item.SetAttributeValue("cathegoryName", row[2].Value);
+                                item.SetAttributeValue("storageDate", row[3].Value);
+                                item.SetAttributeValue("amount", row[4].Value);
+                                item.SetAttributeValue("odpadId", row[5].Value);
+                                item.SetAttributeValue("odpadName", row[6].Value);
+                                item.SetAttributeValue("userName", row[7].Value);
+                                ansRoot.Add(item);
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add record");
+                        }
+                        break;
+                    }
                 case "deleteTrashItem":{
                         try
                         {
@@ -481,6 +516,7 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
+                //TODO
                 case "exportTrashByCathegory":
                     {
                         try

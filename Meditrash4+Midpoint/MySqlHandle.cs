@@ -109,22 +109,21 @@ namespace Meditrash4_Midpoint
             resultReader.Close();
             return returnVals;
         }
-        public List<KeyValuePair<Type, object>> querry(string querry,Dictionary<String,KeyValuePair<MySqlDbType,Object>> parms, int max = -1)
+        public List<List<KeyValuePair<Type, object>>> querry(string querry,List<KeyValuePair<string, KeyValuePair<MySqlDbType,object>>> parms, int max = -1)
         {
             MySqlCommand cmd = new MySqlCommand(querry, conn);
             MySqlDataReader resultReader = cmd.ExecuteReader();
-            List<KeyValuePair<Type, object>> returnVals = new List<KeyValuePair<Type, object>>();
+            List < List <KeyValuePair<Type, object>>> returnVals = new List<List<KeyValuePair<Type, object>>>();
             Console.WriteLine("usersFCount" + resultReader.FieldCount);
             if (resultReader.HasRows) {
                 while (resultReader.Read())
                 {
+                    List<KeyValuePair<Type, object>> row = new List<KeyValuePair<Type, object>>();
                     for (int i = 0; i < resultReader.FieldCount; i++)
                     {
-                        KeyValuePair<Type, object> res = 
-                            new KeyValuePair<Type, object>(
+                        row.Add(new KeyValuePair<Type, object>(
                             resultReader.GetFieldType(i),
-                            resultReader.GetValue(i));
-
+                            resultReader.GetValue(i)));
                     }
                 }
             }
