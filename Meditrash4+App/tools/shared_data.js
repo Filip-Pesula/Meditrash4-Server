@@ -11,18 +11,18 @@ class SharedData {
         return this.#sharedDataObj;
     }
 
-    createHandlers() {
-
-    }
-
     createHandles() {
         this.#ipcInstance.handle('get_loaded_user_data', async (event, arg) => {
             return new Promise((resolve, reject) => {
                 try {
                     resolve({
-                        firstName: this.#sharedDataObj.user.firstName,
-                        lastName: this.#sharedDataObj.user.lastName,
+                        personalNumber: this.#sharedDataObj.user.personalNumber,
+                        username: this.#sharedDataObj.user.username,
+                        firstname: this.#sharedDataObj.user.firstname,
+                        lastname: this.#sharedDataObj.user.lastname,
+                        department: this.#sharedDataObj.user.department,
                         rights: this.#sharedDataObj.user.rights,
+                        favItems: this.#sharedDataObj.user.favItems
                     });
                 } catch (error) {
                     reject(error);

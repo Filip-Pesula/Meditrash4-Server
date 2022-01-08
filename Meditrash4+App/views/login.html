@@ -14,14 +14,14 @@
             try {
                 document.getElementById('error_alert').classList.remove('invisible');
 
-                userData = await window.tools.evaluateFormData({
+                userData = await window.serverRequests.evaluateFormData({
                     name: document.getElementById('name').value,
                     password: document.getElementById('password').value
                 });
                 
                 localStorage.setItem('user', userData);
 
-                await window.tools.continueToMainPage();
+                await window.router.continueToMainPage();
             } catch (error) {
                 document.getElementById('error_alert').classList.add('visible');
                 document.getElementById('error_alert').innerHTML = error.name;

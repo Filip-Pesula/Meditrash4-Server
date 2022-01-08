@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Login form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script>
+        window.onload = async () => {
+            await window.serverRequests.getUserFavItems();
+            userData = await window.localData.getLoadedUserData();
+
+            document.getElementById('personalNumber').value = userData.personalNumber;
+            document.getElementById('username').value = userData.username;
+            document.getElementById('inputPassword').value = 'placeholder';
+            document.getElementById('firstname').value = userData.firstname;
+            document.getElementById('lastname').value = userData.lastname;
+            document.getElementById('department').value = userData.department;
+            document.getElementById('rights').value = userData.rights;
+   
+            allItems = await window.serverRequests.getAllItems();
+
+            allItems.forEach(item => {
+                usersFavItems.forEach(favItem => {
+                    if (item.name === favItem.name) {
+                        item.isFav = true;
+                    }
+                })
+            })
+
+            allItems.forEach(item => {
+                const html = 
+                    `<tr><td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td><input class="form-check-input" type="checkbox" value="" id="${item.id}-checkbox" 
+                    ${item.isFav ? 'checked' : ''}></td></tr>`;
+
+                document.getElementById('favouriteItemsTab').insertAdjacentHTML('beforeend', html);
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand">MediTrash4+</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#"
+                            onclick="window.router.goToProfilePage()">Profil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.router.goToAddRecordPage()">Vložit záznam</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.router.goToRecordViewPage()">Přehled záznamů</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.router.goToStatisticsPage()">Statistiky</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.router.exitToLogin()">Odhlásit se</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="row align-items-center">
+        <div class="col"></div>
+        <div class="card p-0 shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5 mt-5">
+            <div class="card-header">
+                <h3 class="m-0">Profil</h3>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <h5 class="card-title">Uživatelské údaje</h5>
+                    <div class="mb-3 row">
+                        <label for="personalNumber" class="col-sm-4 col-form-label">Rodné číslo</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="personalNumber">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="username" class="col-sm-4 col-form-label">Uživatelské jméno</label>
+                        <div class="col-sm-8">
+                            <div class="col-sm-8">
+                                <input type="text" readonly class="form-control-plaintext" id="username">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inputPassword" class="col-sm-4 col-form-label">Heslo</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input id="inputPassword" type="password" class="form-control" disabled readonly
+                                    aria-describedby="changePassword">
+                                <button class="btn btn-outline-primary" type="button"
+                                    id="changePassword">Upravit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row invisible">
+                        <label for="inputPasswordCheck" class="col-sm-4 col-form-label">Opakujte heslo</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input id="inputPasswordCheck" type="password" class="form-control"
+                                    aria-describedby="inputPasswordChange">
+                                <button class="btn btn-outline-danger" type="button"
+                                    id="inputPasswordChange">Změnit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="firstname" class="col-sm-4 col-form-label">Jméno</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="firstname">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="lastname" class="col-sm-4 col-form-label">Příjmení</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="lastname">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="department" class="col-sm-4 col-form-label">Oddělení</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="department">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="rights" class="col-sm-4 col-form-label">Typ účtu</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="rights">
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <h5 class="card-title">Nastavení pracovních položek</h5>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Název</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody id='favouriteItemsTab'></tbody>
+                    </table>
+                    <input class="btn btn-primary" type="button" value="Uložit změny">
+                </li>
+            </ul>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row align-items-center">
+        <div class="col"></div>
+        <div id="error_alert"
+            class="alert alert-danger shadow invisible col-12 col-sm-12 col-md-7 col-lg-5 col-xl-4 mt-3" role="alert">
+        </div>
+        <div class="col"></div>
+    </div>
+</body>
+
+</html>
