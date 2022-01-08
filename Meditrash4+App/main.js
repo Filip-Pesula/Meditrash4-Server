@@ -1,55 +1,20 @@
 const RequestsHandler = require('./tools/server_requests_handlers.js')
-const { app, BrowserWindow } = require('electron')
-const path = require('path')
+const Router = require('./tools/router.js')
 const { ipcMain } = require('electron');
+const SharedData = require('./tools/shared_data.js');
 
 // static variables, settings
 const port = 16246;
 const host = 'localhost';
 
 // static variables, tools
-const dataStore = {};
+const dataStore = new SharedData({}, ipcMain);
 const requestsHandler = new RequestsHandler(ipcMain, host, port, dataStore);
-let window;
+const router = new Router(ipcMain, 'login_preload.js', 'login.html', dataStore);
 
-// app code
+// init app and add handlers for site routing
+router.initApp().then(router.createHandles())
+
+// add event handlers
 requestsHandler.createHandles();
-
-ipcMain.handle('continue_to_main_page', (event, arg) => {
-    if (dataStore.user.token != 0) {
-        window.loadFile(path.join(__dirname, 'views', 'in.html'));
-        return true;
-    }
-    throw 'Invalid username or password';
-})
-
-app.whenReady().then(() => {
-    window = createWindow('login_preload.js', 'login.html');
-
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            window = createWindow('login_preload.js', 'login.html');
-        }
-    })
-})
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
-})
-
-function createWindow(preloadFileName, viewFileName) {
-    const win = new BrowserWindow({
-        width: 1000,
-        height: 800,
-        webPreferences: {
-            preload: path.join(__dirname, 'preloads', preloadFileName)
-        }
-    });
-
-    win.loadFile(path.join(__dirname, 'views', viewFileName));
-
-    return win;
-}
-
+dataStore.createHandles();

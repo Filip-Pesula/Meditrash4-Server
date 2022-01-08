@@ -12,13 +12,19 @@
     <script>
         async function evaluateFormData() {
             try {
-                await window.tools.evaluateFormData({
+                document.getElementById('error_alert').classList.remove('invisible');
+
+                userData = await window.tools.evaluateFormData({
                     name: document.getElementById('name').value,
                     password: document.getElementById('password').value
                 });
-                window.tools.continueToMainPage();
+                
+                localStorage.setItem('user', userData);
+
+                await window.tools.continueToMainPage();
             } catch (error) {
-                console.log(error)
+                document.getElementById('error_alert').classList.add('visible');
+                document.getElementById('error_alert').innerHTML = error.name;
             }
         }
     </script>
@@ -44,6 +50,13 @@
                     </form>
                 </div>
             </div>
+            <div class="col"></div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col"></div>
+            <div id="error_alert"
+                class="alert alert-danger shadow invisible col-12 col-sm-12 col-md-7 col-lg-5 col-xl-4 mt-3"
+                role="alert"></div>
             <div class="col"></div>
         </div>
     </div>

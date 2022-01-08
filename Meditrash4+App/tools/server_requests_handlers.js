@@ -1,4 +1,3 @@
-const { ipcMain } = require('electron')
 const { RequestAssembler, ResponseParser } = require('./communication.js')
 const net = require('net');
 
@@ -48,8 +47,12 @@ module.exports = class RequestsHandler {
     createHandles() {
         this.#ipcInstance.handle('evaluate_login_data', async (event, arg) => {
             const request = RequestAssembler.createLoginRequest(arg.name, arg.password);
-            this.#dataStore.user = await this.writeData(request);
-            return null;
+            this.#dataStore.getSharedDataObj().user = await this.writeData(request);
+            return {
+                firstname: this.#dataStore.getSharedDataObj().user.firstName,
+                lastname: this.#dataStore.getSharedDataObj().user.lastName,
+                rights: this.#dataStore.getSharedDataObj().user.rights,
+            };
         });
 
         this.#ipcInstance.handle('add_user', async (event, arg) => {
