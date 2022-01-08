@@ -72,22 +72,32 @@ namespace Meditrash4_Midpoint
                             String testName = MySqlHelper.EscapeString(name.Value);
                             List<User> users = mySqlHandle.GetObjectList<User>("name=" + "'" + testName + "'", 2);
                             XElement body = null;
+                            
 
                             if (users.Count == 0)
                             {
                                 body = new XElement("Login",
                                     new XElement("uniqueToken", "0"));
                             }
+                   
                             else
                             {
                                 User user = users[0];
                                 uint key = processLogin(doc, user);
+                                List<Department> departments = mySqlHandle.GetObjectList<Department>("uid='" + users[0].department_id + "'");
+                                if (departments.Count == 0)
+                                {
+                                    departments.Add(new Department(""));
+                                }
+
                                 if (key != 0)
                                 {
                                     body = new XElement("Login",
                                         new XElement("uniqueToken", key.ToString("X")),
                                         new XElement("firstName", user.firstName),
                                         new XElement("lastName", user.lastName),
+                                        new XElement("department", departments[0]).Name,
+                                        new XElement("rodCislo", user.rod_cislo),
                                         new XElement("rights", user.rights)
                                         );
                                 }
@@ -426,7 +436,24 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
-                    //only extention
+                case "deleteTrashItem":{
+                        try
+                        {
+                            string trashId = requestCommand.Element("id").Value;
+                            List<Records> records = mySqlHandle.GetObjectList<Records>("uid = " + MySqlHelper.EscapeString(trashId));
+                            if (records.Count == 0) {
+                                return genIncorrectResponse("removingError", "item does not exist");
+                            }
+                            mySqlHandle.removeObject(records[0]);
+                            return new XElement("Request", "record was added");
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("removingError", "could not remove exist");
+                        }
+                        break;
+                    }
+                //only extention
                 case "addRespPerson":{
                         try
                         {
