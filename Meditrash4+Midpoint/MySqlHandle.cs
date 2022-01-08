@@ -109,6 +109,28 @@ namespace Meditrash4_Midpoint
             resultReader.Close();
             return returnVals;
         }
+        public List<KeyValuePair<Type, object>> querry(string querry,Dictionary<String,KeyValuePair<MySqlDbType,Object>> parms, int max = -1)
+        {
+            MySqlCommand cmd = new MySqlCommand(querry, conn);
+            MySqlDataReader resultReader = cmd.ExecuteReader();
+            List<KeyValuePair<Type, object>> returnVals = new List<KeyValuePair<Type, object>>();
+            Console.WriteLine("usersFCount" + resultReader.FieldCount);
+            if (resultReader.HasRows) {
+                while (resultReader.Read())
+                {
+                    for (int i = 0; i < resultReader.FieldCount; i++)
+                    {
+                        KeyValuePair<Type, object> res = 
+                            new KeyValuePair<Type, object>(
+                            resultReader.GetFieldType(i),
+                            resultReader.GetValue(i));
+
+                    }
+                }
+            }
+            resultReader.Close();
+            return returnVals;
+        }
         public void setObjectParam<T>(T _object, string collum, string value) where T : MysqlReadable
         {
             List<DbVariable> vallist = _object.getObjectData();
