@@ -92,10 +92,6 @@ namespace Meditrash4_Midpoint
 
                                 if (key != 0)
                                 {
-                                    body = genIncorrectResponse("incorrectName", "department has incorrect name");
-                                }
-                                else if (key != 0)
-                                {
                                     body = new XElement("Login",
                                         new XElement("uniqueToken", key.ToString("X")),
                                         new XElement("firstName", user.firstName),
@@ -440,6 +436,43 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
+                case "getTrashItem":
+                    {
+                        try
+                        {
+
+                            DateTime time = new DateTime(
+                                int.Parse(requestCommand.Element("year").Value), 
+                                int.Parse(requestCommand.Element("month").Value),
+                                int.Parse(requestCommand.Element("day").Value));
+                            List<Records> recordList = mySqlHandle.GetObjectList<Records>("date > " + time.ToString("yyyy-mm-dd"));
+                            
+                            mySqlHandle.querry(
+                                @"select records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from records 
+	LEFT JOIN odpad Rec_Odp on records.Odpad_uid = Rec_Odp.uid 
+    LEFT JOIN user Rec_Odp_User on Rec_Odp_User.rodCislo = records.User_rodCislo
+    LEFT JOIN trashcathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
+		where storageDate > @date"
+                            ,new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> {  new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@date", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Date, time))  } );
+                            XElement ansRoot = new XElement("Request");
+                            recordList.ForEach(record =>
+                            {
+                                XElement item = new XElement("record");
+                                item.SetAttributeValue("id", record.uid);
+                                item.SetAttributeValue("date", record.date.ToString("yyyy-mm-dd"));
+                                item.SetAttributeValue("amount", record.amount);
+                                item.SetAttributeValue("amount", record.amount);
+
+                               // item.SetAttributeValue("id", cathegory.id);
+                                ansRoot.Add(item);
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add record");
+                        }
+                        break;
+                    }
                 case "deleteTrashItem":{
                         try
                         {
@@ -481,6 +514,7 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
+                //TODO
                 case "exportTrashByCathegory":
                     {
                         try
