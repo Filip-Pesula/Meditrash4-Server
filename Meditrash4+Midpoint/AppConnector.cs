@@ -20,7 +20,7 @@ namespace Meditrash4_Midpoint
         static RNGCryptoServiceProvider rg;
         MySqlHandle mySqlHandle;
         List<uint> resevedKeys;
-        List<KeyValuePair<uint, User>> registeredList;
+        List<UserLogin> registeredList;
         
         //List<KeyValuePair<uint, string>> registeredList;
         public AppConnector(MySqlHandle _mySqlHandle)
@@ -28,7 +28,7 @@ namespace Meditrash4_Midpoint
             this.mySqlHandle = _mySqlHandle;
             listener = new TcpListener(16246);
             listener.Start();
-            registeredList = new List<KeyValuePair<uint, User>>();
+            registeredList = new List<UserLogin>();
             resevedKeys = new List<uint>();
             rg = new RNGCryptoServiceProvider();
 
@@ -66,11 +66,12 @@ namespace Meditrash4_Midpoint
                 {
                     case "Login":
                         {
+
                             XElement name = doc.Root.Element("name");
                             XElement password = doc.Root.Element("password");
 
                             String testName = MySqlHelper.EscapeString(name.Value);
-                            List<User> users = mySqlHandle.GetObjectList<User>("name=" + "'" + testName + "'", 2);
+                            List<User> users = mySqlHandle.GetObjectList<User>("name= BINARY" + "'" + testName + "'", 2);
                             XElement body = null;
                             
 
@@ -84,6 +85,7 @@ namespace Meditrash4_Midpoint
                             {
                                 User user = users[0];
                                 uint key = processLogin(doc, user);
+                                clearTokens(key);
                                 List<Department> departments = mySqlHandle.GetObjectList<Department>("uid='" + users[0].department_id + "'");
                                 if (departments.Count == 0)
                                 {
@@ -97,7 +99,7 @@ namespace Meditrash4_Midpoint
                                         new XElement("firstName", user.firstName),
                                         new XElement("lastName", user.lastName),
                                         new XElement("userName", user.userName),
-                                        new XElement("department", departments[0]),
+                                        new XElement("department", departments[0].name),
                                         new XElement("rodCislo", user.rod_cislo),
                                         new XElement("rights", user.rights)
                                         );
@@ -123,11 +125,11 @@ namespace Meditrash4_Midpoint
                             XElement keyX = doc.Root.Element("uniqueToken");
                             uint key = uint.Parse(keyX.Value,System.Globalization.NumberStyles.HexNumber);
                             User user = null;
-                            foreach(KeyValuePair<uint,User> userPair in registeredList)
+                            foreach(UserLogin userPair in registeredList)
                             {
-                                if(userPair.Key == key)
+                                if(userPair.token == key)
                                 {
-                                    user = userPair.Value;
+                                    user = userPair.user;
                                 }
                             }
                             XElement response = null;
@@ -468,10 +470,12 @@ namespace Meditrash4_Midpoint
                                 item.SetAttributeValue("userName", row[7].Value);
                                 ansRoot.Add(item);
                             });
+                            return ansRoot;
+                            break;
                         }
                         catch (Exception ex)
                         {
-                            return genIncorrectResponse("addingError", "could not add record");
+                            return genIncorrectResponse("addingError", "could get records");
                         }
                         break;
                     }
@@ -578,7 +582,7 @@ namespace Meditrash4_Midpoint
                         newRandKey = randomvalue;
                     }
                 }
-                registeredList.Add(new KeyValuePair<uint, User>(newRandKey,user));
+                registeredList.Add(new UserLogin(newRandKey,user, DateTime.Now));
                 return newRandKey;
             }
             return 0U;
@@ -593,14 +597,28 @@ namespace Meditrash4_Midpoint
         {
             listener.Stop();
         }
+        private void clearTokens(uint token)
+        {
+            for(int i = 0; i < registeredList.Count; i++)
+            {
+                if(registeredList[i].token == token)
+                {
+                    registeredList[i].timeStamp = DateTime.Now;
+                }
+                if(registeredList[i].timeStamp < DateTime.Now.AddMinutes(-30))
+                {
+                    registeredList.RemoveAt(i);
+                }
+            }
+        }
         private User getUserByKey(uint key)
         {
             User user = null;
-            foreach (KeyValuePair<uint, User> userPair in registeredList)
+            foreach (UserLogin userPair in registeredList)
             {
-                if (userPair.Key == key)
+                if (userPair.token == key)
                 {
-                    user = userPair.Value;
+                    user = userPair.user;
                 }
             }
             return user;

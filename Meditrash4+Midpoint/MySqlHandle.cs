@@ -112,6 +112,10 @@ namespace Meditrash4_Midpoint
         public List<List<KeyValuePair<Type, object>>> querry(string querry,List<KeyValuePair<string, KeyValuePair<MySqlDbType,object>>> parms, int max = -1)
         {
             MySqlCommand cmd = new MySqlCommand(querry, conn);
+            foreach (KeyValuePair<string,KeyValuePair<MySqlDbType,object>> param in parms)
+            {
+                cmd.Parameters.Add(param.Key,param.Value.Key).Value = param.Value.Value;
+            }
             MySqlDataReader resultReader = cmd.ExecuteReader();
             List < List <KeyValuePair<Type, object>>> returnVals = new List<List<KeyValuePair<Type, object>>>();
             Console.WriteLine("usersFCount" + resultReader.FieldCount);
@@ -125,6 +129,7 @@ namespace Meditrash4_Midpoint
                             resultReader.GetFieldType(i),
                             resultReader.GetValue(i)));
                     }
+                    returnVals.Add(row);
                 }
             }
             resultReader.Close();

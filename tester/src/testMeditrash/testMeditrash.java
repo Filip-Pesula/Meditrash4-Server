@@ -30,9 +30,9 @@ public class testMeditrash {
 
             DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = df.newDocumentBuilder();
-            System.out.println("<Login><name>ROOT</name><password>root</password></Login>");
+            System.out.println("<Login><name>root</name><password>root</password></Login>");
             String retMessage = sendReadMsg(
-                    "<Login><name>ROOT</name><password>root</password></Login>"
+                    "<Login><name>root</name><password>root</password></Login>"
             );
             Document returnMessage = db.parse(new InputSource(new StringReader(retMessage)));
             String token = returnMessage.getElementsByTagName("uniqueToken").item(0).getTextContent();
@@ -190,6 +190,20 @@ public class testMeditrash {
                     XmlWriter.createDoc(rootTrashItem2)
             );
 
+            XElement rootGetTrashItem = new XElement("Request",
+                    new XElement("uniqueToken",tokenLoginJosef),
+                    new XElement("requestCommand",
+                            new XElement("year","2000"),
+                            new XElement("month","10"),
+                            new XElement("day","1")
+                    )
+            );
+            rootGetTrashItem.children.get(1).setAttribute("name","getTrashItem");
+            System.out.println( XmlWriter.createDoc(rootGetTrashItem));
+            String retGetTrashItem = sendReadMsg(
+                    XmlWriter.createDoc(rootGetTrashItem)
+            );
+            System.out.println();
 
         } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
             e.printStackTrace();
