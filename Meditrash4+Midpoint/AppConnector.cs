@@ -92,6 +92,10 @@ namespace Meditrash4_Midpoint
 
                                 if (key != 0)
                                 {
+                                    body = genIncorrectResponse("incorrectName", "department has incorrect name");
+                                }
+                                else if (key != 0)
+                                {
                                     body = new XElement("Login",
                                         new XElement("uniqueToken", key.ToString("X")),
                                         new XElement("firstName", user.firstName),
