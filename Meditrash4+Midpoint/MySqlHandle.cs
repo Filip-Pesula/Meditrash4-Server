@@ -198,7 +198,14 @@ namespace Meditrash4_Midpoint
                 throw e;
             }
         }
-        public List<T> GetObjectList<T>(string condition, int max = -1) where T : MysqlReadable, new()
+        private void fillParrms(ref MySqlCommand cmd, List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> parms, int max = -1)
+        {
+            foreach (KeyValuePair<string, KeyValuePair<MySqlDbType, object>> param in parms)
+            {
+                cmd.Parameters.Add(param.Key, param.Value.Key).Value = param.Value.Value;
+            }
+        }
+        public List<T> GetObjectList<T>(string condition, List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> parms, int max = -1) where T : MysqlReadable, new()
         {
             Exception e = null;
             Monitor.Enter(connLock);
@@ -207,6 +214,7 @@ namespace Meditrash4_Midpoint
             {
                 T t = new T();
                 MySqlCommand cmd = new MySqlCommand("SELECT * FROM " + t.getMyName() + " WHERE " + condition, conn);
+                fillParrms(ref cmd, parms);
                 resultReader = cmd.ExecuteReader();
                 List<T> returnVals = new List<T>();
 

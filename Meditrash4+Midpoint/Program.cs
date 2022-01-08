@@ -89,10 +89,6 @@ namespace Meditrash4_Midpoint
                 //mySqlHandle.querry(sql,10);
                 String testName = MySqlHelper.EscapeString("ROOT");
 
-                List<User> users = mySqlHandle.GetObjectList<User>("name="+"'"+testName+ "'", 2);
-                if (users.Count!=1) {
-                    Logger.Log("user ROOT not found");
-                }
                 /*
                 User userToset = new User("petr.novak", 5,1,"Petr","Novak");
                 try

@@ -70,8 +70,13 @@ namespace Meditrash4_Midpoint
                             XElement name = doc.Root.Element("name");
                             XElement password = doc.Root.Element("password");
 
-                            String testName = MySqlHelper.EscapeString(name.Value);
-                            List<User> users = mySqlHandle.GetObjectList<User>("name= BINARY" + "'" + testName + "'", 2);
+                            List<User> users = mySqlHandle.GetObjectList<User>(
+                                "name= BINARY @name",
+                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@name",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,name.Value))},
+                                2);
                             XElement body = null;
                             
 
@@ -86,7 +91,12 @@ namespace Meditrash4_Midpoint
                                 User user = users[0];
                                 uint key = processLogin(doc, user);
                                 clearTokens(key);
-                                List<Department> departments = mySqlHandle.GetObjectList<Department>("uid='" + users[0].department_id + "'");
+                                List<Department> departments = mySqlHandle.GetObjectList<Department>(
+                                    "uid= @uid",
+                                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@uid",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,users[0].department_id))});
                                 if (departments.Count == 0)
                                 {
                                     departments.Add(new Department(""));
@@ -184,7 +194,11 @@ namespace Meditrash4_Midpoint
                     try
                     {
                         string department = requestCommand.Element("department").Value;
-                        List<Department> departments = mySqlHandle.GetObjectList<Department>("name='" + department + "'");
+                        List<Department> departments = mySqlHandle.GetObjectList<Department>("name= @name", 
+                            new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@name",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,department))});
                         if(departments.Count == 0)
                         {
                             return genIncorrectResponse("incorrectName", "department has incorrect name");
@@ -236,7 +250,12 @@ namespace Meditrash4_Midpoint
                         String name = nameEl.Value;
                         try
                         {
-                            Department department = mySqlHandle.GetObjectList<Department>("name = " + MySqlHelper.EscapeString(name))[0];
+                            Department department = mySqlHandle.GetObjectList<Department>(
+                                "name = @name",
+                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@name",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,name))})[0];
                             mySqlHandle.removeObject(department);
                             return new XElement("Request", "department was Added");
                         }
@@ -249,7 +268,7 @@ namespace Meditrash4_Midpoint
                 case "getDepartments":
                     try
                     {
-                        List<Department> departmentList = mySqlHandle.GetObjectList<Department>("true");
+                        List<Department> departmentList = mySqlHandle.GetObjectList<Department>("true", new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>());
                         XElement ansRoot = new XElement("Request");
                         foreach (Department department in departmentList)
                         {
@@ -300,7 +319,7 @@ namespace Meditrash4_Midpoint
                     {
                         try
                         {
-                            List<Cathegory> trashList = mySqlHandle.GetObjectList<Cathegory>("true");
+                            List<Cathegory> trashList = mySqlHandle.GetObjectList<Cathegory>("true", new());
                             XElement ansRoot = new XElement("Request");
                             foreach (Cathegory cathegory in trashList)
                             {
@@ -352,7 +371,7 @@ namespace Meditrash4_Midpoint
                     {
                         try
                         {
-                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("true");
+                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("true",new());
                             XElement ansRoot = new XElement("Request");
                             foreach (Trash trash in trashList)
                             {
@@ -378,8 +397,45 @@ namespace Meditrash4_Midpoint
                         {
                             requestCommand.Elements("id").ToList().ForEach(x =>
                             {
-                                string trashId = x.Value;
-                                List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
+                                int trashId = int.Parse(x.Value);
+                                List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = @uid", 
+                                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new(
+                                            "@uid",
+                                            new(MySqlDbType.VarChar,trashId))});
+                                TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
+                                mySqlHandle.saveObject(trashFaw);
+                                try
+                                {
+                                    mySqlHandle.saveObject(trashFaw);
+                                }
+                                catch (Exception e)
+                                {
+                                    errormsg += "addError" + e.Message + '\n';
+                                }
+                            });
+                            return new XElement("Request", "item was added" + errormsg);
+                        }
+                        catch (Exception ex)
+                        {
+                            return genIncorrectResponse("addingError", "could not add item" + errormsg);
+                        }
+                        break;
+                    }
+                case "deleteFavItem":
+                    {
+                        string errormsg = "";
+                        try
+                        {
+                            requestCommand.Elements("id").ToList().ForEach(x =>
+                            {
+                                int trashId = int.Parse(x.Value);
+                                List<Trash> trash = mySqlHandle.GetObjectList<Trash>(
+                                    "uid = @uid",
+                                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> 
+                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@uid",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,trashId))});
                                 TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
                                 mySqlHandle.saveObject(trashFaw);
                                 try
@@ -402,19 +458,24 @@ namespace Meditrash4_Midpoint
                 case "getFavList":{
                         try
                         {
-                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = " + MySqlHelper.EscapeString(opUser.rod_cislo.ToString()) + ")");
+                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>(
+                                "uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = @User_rodCislo )",
+                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new(
+                                            "@User_rodCislo",
+                                            new(MySqlDbType.Int64,opUser.rod_cislo))});
 
                             XElement ansRoot =  new XElement("Request");
                             XElement reqCommand = new XElement("RequestCommand");
                             reqCommand.SetAttributeValue("name", "getFavList");
-                            ansRoot.Add(reqCommand);
                             foreach (Trash trash in trashList)
                             {
                                 XElement item = new XElement("item");
                                 item.SetAttributeValue("name", trash.name);
                                 item.SetAttributeValue("id", trash.uid);
-                                ansRoot.Add(item);
+                                reqCommand.Add(item);
                             }
+                            ansRoot.Add(reqCommand);
                             return ansRoot;
                         }
                         catch (Exception ex)
@@ -426,9 +487,14 @@ namespace Meditrash4_Midpoint
                 case "trashItem":{
                         try
                         {
-                            string trashId = requestCommand.Element("id").Value;
+                            int trashId = int.Parse(requestCommand.Element("id").Value);
                             int trashCout = int.Parse(requestCommand.Element("count").Value);
-                            List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = " + MySqlHelper.EscapeString(trashId));
+                            List<Trash> trash = mySqlHandle.GetObjectList<Trash>(
+                                "uid = @uid", 
+                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new(
+                                            "@uid",
+                                            new(MySqlDbType.Int32,trashId))});
                             Records record = new Records(trashCout, trash[0].uid,opUser.rod_cislo);
                             mySqlHandle.saveObject(record);
                             return new XElement("Request", "record was added");
@@ -456,7 +522,11 @@ namespace Meditrash4_Midpoint
 		                                where storageDate > @date"
                             ,new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> {  new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@date", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Date, time))  } );
                             //time.ToString("yyyy-mm-dd")
+
                             XElement ansRoot = new XElement("Request");
+                            XElement reqCommand = new XElement("RequestCommand");
+                            reqCommand.SetAttributeValue("name", "getTrashItem");
+
                             data.ForEach(row =>
                             {
                                 XElement item = new XElement("record");
@@ -468,8 +538,9 @@ namespace Meditrash4_Midpoint
                                 item.SetAttributeValue("odpadId", row[5].Value);
                                 item.SetAttributeValue("odpadName", row[6].Value);
                                 item.SetAttributeValue("userName", row[7].Value);
-                                ansRoot.Add(item);
+                                reqCommand.Add(item);
                             });
+                            ansRoot.Add(reqCommand);
                             return ansRoot;
                             break;
                         }
@@ -479,11 +550,17 @@ namespace Meditrash4_Midpoint
                         }
                         break;
                     }
+                    //TODO
                 case "deleteTrashItem":{
                         try
                         {
-                            string trashId = requestCommand.Element("id").Value;
-                            List<Records> records = mySqlHandle.GetObjectList<Records>("uid = " + MySqlHelper.EscapeString(trashId));
+                            int trashId = int.Parse(requestCommand.Element("id").Value);
+                            List<Records> records = mySqlHandle.GetObjectList<Records>(
+                                "uid = @uid", 
+                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new(
+                                            "@uid",
+                                            new(MySqlDbType.Int32,trashId))});
                             if (records.Count == 0) {
                                 return genIncorrectResponse("removingError", "item does not exist");
                             }
@@ -527,13 +604,24 @@ namespace Meditrash4_Midpoint
                         {
                             XElement respPerson = requestCommand.Element("respPerson");
                             int respPersonIco = int.Parse(respPerson.Element("ico").Value);
-                            List<RespPerson> respPerson1 = mySqlHandle.GetObjectList<RespPerson>("ico = " + respPersonIco.ToString());
+                            List<RespPerson> respPerson1 = mySqlHandle.GetObjectList<RespPerson>(
+                                "ico = @ico", 
+                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>{ 
+                                    new(
+                                        "@ico",
+                                        new(MySqlDbType.Int64,respPersonIco))}
+                            );
                             if (respPerson1.Count == 0)
                                 throw new Exception("Resp person does not exist");
                             requestCommand.Elements("cathegory").ToList().ForEach(cathegory =>
                             {
                                 int intVal = int.Parse(cathegory.Element("id").Value);
-                                List<Cathegory> cathegory1 = mySqlHandle.GetObjectList<Cathegory>("id = " + intVal.ToString());
+                                List<Cathegory> cathegory1 = mySqlHandle.GetObjectList<Cathegory>(
+                                    "id = @id",
+                                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>{
+                                    new(
+                                        "@id",
+                                        new(MySqlDbType.Int32,intVal))});
                                 if (cathegory1.Count == 0)
                                     return;
                                 ExportRecords exportRecords = new ExportRecords(respPerson1[0].ico);
@@ -562,7 +650,12 @@ namespace Meditrash4_Midpoint
             XElement password = doc.Root.Element("password");
 
             String testName = MySqlHelper.EscapeString(name.Value);
-            List<User> users = mySqlHandle.GetObjectList<User>("name=" + "'" + testName + "'", 2);
+            List<User> users = mySqlHandle.GetObjectList<User>("name = @name",
+                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                                        { new(
+                                            "@name",
+                                            new(MySqlDbType.VarChar,name.Value))},
+                2);
             if (users.Count == 0)
             {
                 return 0;
