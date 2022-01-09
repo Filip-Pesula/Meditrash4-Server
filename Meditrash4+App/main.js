@@ -10,7 +10,7 @@ const host = 'localhost';
 // static variables, tools
 const dataStore = new SharedData({}, ipcMain);
 const requestsHandler = new RequestsHandler(ipcMain, host, port, dataStore);
-const router = new Router(ipcMain, 'login_preload.js', 'login.html', dataStore);
+const router = new Router(ipcMain, 'preload.js', 'login.html', dataStore);
 
 // init app and add handlers for site routing
 router.initApp().then(router.createHandles())
