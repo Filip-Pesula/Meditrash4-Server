@@ -405,18 +405,36 @@ namespace Meditrash4_Midpoint
         {
             try
             {
-
-                DateTime time = new DateTime(
-                    int.Parse(requestCommand.Element("year").Value),
-                    int.Parse(requestCommand.Element("month").Value),
-                    int.Parse(requestCommand.Element("day").Value));
+                int cathegory = int.Parse(requestCommand.Element("catheory").Value);
+                DateTime timeStart = new DateTime(
+                    int.Parse(requestCommand.Element("yearStart").Value),
+                    int.Parse(requestCommand.Element("monthStart").Value),
+                    int.Parse(requestCommand.Element("dayStart").Value));
+                DateTime timeEnd = new DateTime(
+                    int.Parse(requestCommand.Element("yearEnd").Value),
+                    int.Parse(requestCommand.Element("monthEnd").Value),
+                    int.Parse(requestCommand.Element("dayEnd").Value));
                 var data = mySqlHandle.querry(
                    @"select records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from records 
 	                                LEFT JOIN odpad Rec_Odp on records.Odpad_uid = Rec_Odp.uid 
                                     LEFT JOIN user Rec_Odp_User on Rec_Odp_User.rodCislo = records.User_rodCislo
                                     LEFT JOIN trashcathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
-		                                where storageDate > @date"
-               , new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@date", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Date, time)) });
+		                                where storageDate >= @dateStart AND storageDate <= @dateEnd AND Rec_Odp_User_Trc.id = @catheory"
+               , new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> 
+               { 
+                   new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                       "@dateStart", 
+                       new KeyValuePair<MySqlDbType, object>(MySqlDbType.Date, 
+                       timeStart)),
+                   new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                       "@dateEnd", 
+                       new KeyValuePair<MySqlDbType, object>(MySqlDbType.Date, 
+                       timeEnd)),
+                    new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                       "@catheory", 
+                       new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,
+                       cathegory)) 
+               });
                 //time.ToString("yyyy-mm-dd")
 
                 XElement rootRes = new XElement("requestCommand");

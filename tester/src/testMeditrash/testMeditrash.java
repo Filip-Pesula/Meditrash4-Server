@@ -193,9 +193,12 @@ public class testMeditrash {
             XElement rootGetTrashItem = new XElement("Request",
                     new XElement("uniqueToken",tokenLoginJosef),
                     new XElement("requestCommand",
-                            new XElement("year","2000"),
-                            new XElement("month","10"),
-                            new XElement("day","1")
+                            new XElement("yearStart","2000"),
+                            new XElement("monthStart","10"),
+                            new XElement("dayStart","1"),
+                            new XElement("yearEnd","2022"),
+                            new XElement("monthEnd","1"),
+                            new XElement("dayEnd","1")
                     )
             );
             rootGetTrashItem.children.get(1).setAttribute("name","getTrashItem");
@@ -210,7 +213,7 @@ public class testMeditrash {
         }
 
     }
-    static String sendReadMsg(String msg) throws IOException {
+    public static String sendReadMsg(String msg) throws IOException {
         Socket clientSocket;
         PrintWriter out;
         InputStream in;
