@@ -564,10 +564,10 @@ namespace Meditrash4_Midpoint
                     int.Parse(requestCommand.Element("monthEnd").Value),
                     int.Parse(requestCommand.Element("dayEnd").Value));
                 var data = mySqlHandle.querry(
-                   @"select records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from records 
-	                                LEFT JOIN odpad Rec_Odp on records.Odpad_uid = Rec_Odp.uid 
-                                    LEFT JOIN user Rec_Odp_User on Rec_Odp_User.rodCislo = records.User_rodCislo
-                                    LEFT JOIN trashcathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
+                   @"select Records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from Records 
+	                                LEFT JOIN Odpad Rec_Odp on Records.Odpad_uid = Rec_Odp.uid 
+                                    LEFT JOIN User Rec_Odp_User on Rec_Odp_User.rodCislo = Records.User_rodCislo
+                                    LEFT JOIN TrashCathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
 		                                where storageDate >= @dateStart AND storageDate <= @dateEnd AND Rec_Odp_User_Trc.id = @catheory"
                , new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> 
                { 
