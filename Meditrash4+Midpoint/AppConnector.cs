@@ -190,6 +190,9 @@ namespace Meditrash4_Midpoint
                 case "addUser":
                     return ReqResolver.addUser(requestCommand,opUser,mySqlHandle);
                     break;
+                case "removeUser":
+                    return ReqResolver.removeUser(requestCommand,opUser,mySqlHandle);
+                    break;
                 case "editPassword":
                     return ReqResolver.editPassword(requestCommand, opUser, mySqlHandle);
                     break;
@@ -205,12 +208,18 @@ namespace Meditrash4_Midpoint
                 //only extention
                 case "addCathegory":
                     return  ReqResolver.addCathegory(requestCommand, opUser, mySqlHandle);
+                    break;  
+                case "removeCathegory":
+                    return  ReqResolver.removeCathegory(requestCommand, opUser, mySqlHandle);
                     break;
                 case "getCathegories":
                     return ReqResolver.getCathegories(requestCommand, opUser, mySqlHandle);
                     break;
                 case "addItem":
                     return ReqResolver.addItem(requestCommand, opUser, mySqlHandle);
+                    break;
+                case "removeItem":
+                    return ReqResolver.removeItem(requestCommand, opUser, mySqlHandle);
                     break;
                 case "getItems":
                     return ReqResolver.getItems(requestCommand, opUser, mySqlHandle);
@@ -226,6 +235,9 @@ namespace Meditrash4_Midpoint
                     break;
                 case "trashItem":
                     return ReqResolver.trashItem(requestCommand, opUser, mySqlHandle);
+                    break;
+                case "removeRecord":
+                    return ReqResolver.removeRecord(requestCommand, opUser, mySqlHandle);
                     break;
                 case "getTrashItem":
                     return ReqResolver.getTrashItem(requestCommand, opUser, mySqlHandle);

@@ -199,7 +199,7 @@ namespace Meditrash4_Midpoint
                 throw e;
             }
         }
-        private void fillParrms(ref MySqlCommand cmd, List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> parms, int max = -1)
+        private void fillParrms(ref MySqlCommand cmd, List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> parms)
         {
             foreach (KeyValuePair<string, KeyValuePair<MySqlDbType, object>> param in parms)
             {
@@ -289,7 +289,7 @@ namespace Meditrash4_Midpoint
             cond = cond.Remove(cond.Length - 4);
             return cond;
         }
-        internal void removeObject<T>(T _object) where T : MysqlReadable
+        public void removeObject<T>(T _object) where T : MysqlReadable
         {
             Exception e = null;
             MySqlCommand cmd = new MySqlCommand("", conn);
@@ -500,43 +500,24 @@ ALTER TABLE User ADD CONSTRAINT User_Department FOREIGN KEY User_Department (Dep
 -- End of file.
 ", conn);
             cmd.ExecuteNonQuery();
+            //add defaut root user
             cmd = new MySqlCommand(@"insert into User
 values(254751000,2,'root','ROOT','admin',unhex(SHA2('root',256)),null);", conn);
             cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180101,'Ostré předměty');", conn);
+
+
+            cmd = new MySqlCommand(@"insert into TrashCathegody
+values
+(180101,'Ostré předměty'),
+(180102,'Části těla a orgány včetně krevních vaků a krevních konzerv'),
+(180103,'Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na prevenci infekce'),
+(180104,'Odpady, na jejichž sběr a odstraňování nejsou kladeny zvláštní požadavky s ohledem na prevenci infekce'),
+(180106,'Chemikálie, které jsou nebo obsahují nebezpečné látky'),
+(180107,'Chemikálie neuvedené pod číslem 18 01 06'),
+(180108,'Nepoužitelná cytostatika'),
+(180109,'Jiná nepoužitelná léčiva neuvedená pod číslem 18 01 08'),
+(180110,'Odpadní amalgám ze stomatologické péče');", conn);
             cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180102,'Části těla a orgány včetně krevních vaků a krevních konzerv');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180103,'Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na prevenci infekce');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180104,'Odpady, na jejichž sběr a odstraňování nejsou kladeny zvláštní požadavky s ohledem na prevenci infekce');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180106,'Chemikálie, které jsou nebo obsahují nebezpečné látky');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180107,'Chemikálie neuvedené pod číslem 18 01 06');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180108,'Nepoužitelná cytostatika');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180109,'Jiná nepoužitelná léčiva neuvedená pod číslem 18 01 08');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180110,'Odpadní amalgám ze stomatologické péče');", conn);
-            cmd.ExecuteNonQuery();
-            /*
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180201,'Ostré předměty (kromě čísla 18 02 02)');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180202,'Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na prevenci infekce');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180203,'Odpady, na jejichž sběr a odstraňování nejsou kladeny zvláštní požadavky s ohledem na prevenci infekce');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180205,'Chemikálie sestávající z nebezpečných látek nebo tyto látky obsahující');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180206,'Jiné chemikálie neuvedené pod číslem 18 02 05');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180207,'Nepoužitelná cytostatika');", conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180208,'Jiná nepoužitelná léčiva neuvedená pod číslem 18 02 07');", conn);
-            cmd.ExecuteNonQuery();
-            */
         }
     }
     

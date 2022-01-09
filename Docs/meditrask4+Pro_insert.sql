@@ -67,26 +67,49 @@ values
 
 insert into records(storageDate,amount,Odpad_uid,User_rodCislo,DeStoreRecords_uid)
 values
-(2020-03-01,'10', '1' , '9409072112', 'Liberec',null),
-(2020-03-01,'3', '2' , '9409072112', 'Liberec',null),
-(2021-03-01,'8', '2' , '9409072112', 'Liberec',null),
-(2021-03-01,'1', '1' , '9409072112', 'Liberec',null),
-(2020-03-01,'1', '1' , '7112108388', 'Liberec',null),
-(2020-03-01,'4', '1' , '7112108388', 'Liberec',null),
-(2021-03-01,'1', '2' , '7112108388', 'Liberec',null),
-(2021-03-01,'1', '1' , '7112108388', 'Liberec',null),
-(2021-03-01,'8', '1' , '7112108388', 'Liberec',null),
-(2020-03-01,'6', '2' , '0106065355', 'Liberec',null),
-(2021-03-01,'1', '1' , '0106065355', 'Liberec',null),
-(2021-03-01,'1', '3' , '0106065355', 'Liberec',null);
+('2020-03-01','10', '1' , '9409072112',null),
+('2020-03-01','3', '2' , '9409072112',null),
+('2021-03-01','8', '2' , '9409072112',null),
+('2021-03-01','1', '1' , '9409072112',null),
+('2020-03-01','1', '1' , '7112108388',null),
+('2020-03-01','4', '1' , '7112108388',null),
+('2021-03-01','1', '2' , '7112108388',null),
+('2021-03-01','1', '1' , '7112108388',null),
+('2021-03-01','8', '1' , '7112108388',null),
+('2020-03-01','6', '2' , '0106065355',null),
+('2021-03-01','1', '1' , '0106065355',null),
+('2021-03-01','1', '3' , '0106065355',null);
 
 insert into exportrecords(exportDate,RespPerson_ico)
 values
-(2020-03-05,'52174116'),
-(2020-03-05,'58015296'),
-(2020-03-05,'10844595');
-
-SELECT * FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords);
+('2000-03-05','52174116'),
+('2001-03-05','58015296'),
+('2002-03-05','58015296'),
+('2003-03-05','58015296'),
+('2004-03-05','58015296'),
+('2005-03-05','58015296'),
+('2006-03-05','58015296'),
+('2007-03-05','58015296'),
+('2008-03-05','58015296'),
+('2009-03-05','58015296'),
+('2010-03-05','58015296'),
+('2011-03-05','58015296'),
+('2022-01-05','10844595');
 
 update records
-SET DeStoreRecords_uid = 1;
+SET DeStoreRecords_uid = (SELECT uid FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords)) where uid in (select * from (select R.uid  from odpad  LEFT join records R on odpad.uid = R.Odpad_uid where TrashCathegody_id = 180101 AND DeStoreRecords_uid = null ) AS X);
+
+insert into TrashCathegody
+values
+(180101,'Ostré předměty'),
+(180102,'Části těla a orgány včetně krevních vaků a krevních konzerv'),
+(180103,'Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na prevenci infekce'),
+(180104,'Odpady, na jejichž sběr a odstraňování nejsou kladeny zvláštní požadavky s ohledem na prevenci infekce'),
+(180106,'Chemikálie, které jsou nebo obsahují nebezpečné látky'),
+(180107,'Chemikálie neuvedené pod číslem 18 01 06'),
+(180108,'Nepoužitelná cytostatika'),
+(180109,'Jiná nepoužitelná léčiva neuvedená pod číslem 18 01 08'),
+(180110,'Odpadní amalgám ze stomatologické péče');
+
+
+

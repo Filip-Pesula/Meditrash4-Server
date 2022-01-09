@@ -58,6 +58,39 @@ namespace Meditrash4_Midpoint
                 return genIncorrectResponse("addUser", "addingError", "could not add user");
             }
         }
+        public static XElement removeUser(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
+        {
+            if (opUser.rights < 2)
+            {
+                return genIncorrectResponse("removeUser", "notPermitted", "not Permitted to this operation");
+            }
+            XElement nameEl = requestCommand.Element("name");
+            if (nameEl == null)
+            {
+                return genIncorrectResponse("removeUser", "missingArgument", "missing name");
+            }
+            String name = nameEl.Value;
+            try
+            {
+                User user = mySqlHandle.GetObjectList<User>(
+                    "name = @name",
+                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                            { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@name",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,name))})[0];
+                mySqlHandle.removeObject(user);
+
+                XElement rootRes = new XElement("requestCommand");
+                rootRes.SetAttributeValue("name", "removeUser");
+                return new XElement("Request",
+                    rootRes,
+                    new XElement("Message", "user was Removed"));
+            }
+            catch (Exception ex)
+            {
+                return genIncorrectResponse("removeUser", "removingError", "could not add department");
+            }
+        }
         public static XElement editPassword(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
         {
             try
@@ -106,37 +139,35 @@ namespace Meditrash4_Midpoint
         }
         public static XElement removeDepartment(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
         {
+            if (opUser.rights < 2)
             {
-                if (opUser.rights < 2)
-                {
-                    return genIncorrectResponse("removeDepartment", "notPermitted", "not Permitted to this operation");
-                }
-                XElement nameEl = requestCommand.Element("name");
-                if (nameEl == null)
-                {
-                    return genIncorrectResponse("removeDepartment", "missingArgument", "missing name");
-                }
-                String name = nameEl.Value;
-                try
-                {
-                    Department department = mySqlHandle.GetObjectList<Department>(
-                        "name = @name",
-                        new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                                { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
-                                            "@name",
-                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,name))})[0];
-                    mySqlHandle.removeObject(department);
+                return genIncorrectResponse("removeDepartment", "notPermitted", "not Permitted to this operation");
+            }
+            XElement nameEl = requestCommand.Element("name");
+            if (nameEl == null)
+            {
+                return genIncorrectResponse("removeDepartment", "missingArgument", "missing name");
+            }
+            String name = nameEl.Value;
+            try
+            {
+                Department department = mySqlHandle.GetObjectList<Department>(
+                    "name = @name",
+                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                            { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                        "@name",
+                                        new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,name))})[0];
+                mySqlHandle.removeObject(department);
 
-                    XElement rootRes = new XElement("requestCommand");
-                    rootRes.SetAttributeValue("name", "removeDepartment");
-                    return new XElement("Request",
-                        rootRes,
-                        new XElement("Message", "department was Removed"));
-                }
-                catch (Exception ex)
-                {
-                    return genIncorrectResponse("removeDepartment", "removingError", "could not add department");
-                }
+                XElement rootRes = new XElement("requestCommand");
+                rootRes.SetAttributeValue("name", "removeDepartment");
+                return new XElement("Request",
+                    rootRes,
+                    new XElement("Message", "department was Removed"));
+            }
+            catch (Exception ex)
+            {
+                return genIncorrectResponse("removeDepartment", "removingError", "could not add department");
             }
         }
         public static XElement getDepartments(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
@@ -194,6 +225,39 @@ namespace Meditrash4_Midpoint
                 return genIncorrectResponse("addCathegory", "addingError", "could not add cathegory\n" + errormsg);
             }
         }
+        public static XElement removeCathegory(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
+        {
+            if (opUser.rights < 2)
+            {
+                return genIncorrectResponse("removeDepartment", "notPermitted", "not Permitted to this operation");
+            }
+            XElement nameEl = requestCommand.Element("id");
+            if (nameEl == null)
+            {
+                return genIncorrectResponse("removeCathegory", "missingArgument", "missing name");
+            }
+            try
+            {
+                int id = int.Parse(nameEl.Value);
+                Cathegory cathegory = mySqlHandle.GetObjectList<Cathegory>(
+                    "id = @id",
+                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                            { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@id",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,id))})[0];
+                mySqlHandle.removeObject(cathegory);
+
+                XElement rootRes = new XElement("requestCommand");
+                rootRes.SetAttributeValue("name", "removeCathegory");
+                return new XElement("Request",
+                    rootRes,
+                    new XElement("Message", "cathegiry was Removed"));
+            }
+            catch (Exception ex)
+            {
+                return genIncorrectResponse("removeCathegory", "removingError", "could not add department");
+            }
+        }
         public static XElement getCathegories(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
         {
             try
@@ -249,6 +313,39 @@ namespace Meditrash4_Midpoint
                 return genIncorrectResponse("addItem", "addingError", "could not add item\n" + errormsg);
             }
         }
+        public static XElement removeItem(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
+        {
+            if (opUser.rights < 2)
+            {
+                return genIncorrectResponse("removeItem", "notPermitted", "not Permitted to this operation");
+            }
+            XElement nameEl = requestCommand.Element("id");
+            if (nameEl == null)
+            {
+                return genIncorrectResponse("removeItem", "missingArgument", "missing name");
+            }
+            try
+            {
+                int id = int.Parse(nameEl.Value);
+                Trash trash = mySqlHandle.GetObjectList<Trash>(
+                    "uid = @uid",
+                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                            { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "@uid",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,id))})[0];
+                mySqlHandle.removeObject(trash);
+
+                XElement rootRes = new XElement("requestCommand");
+                rootRes.SetAttributeValue("name", "removeItem");
+                return new XElement("Request",
+                    rootRes,
+                    new XElement("Message", "trash was Removed"));
+            }
+            catch (Exception ex)
+            {
+                return genIncorrectResponse("removeItem", "removingError", "could not add department");
+            }
+        }
         public static XElement getItems(XElement requestCommand, User opUser, MySqlHandle mySqlHandle) {
             try
             {
@@ -273,8 +370,6 @@ namespace Meditrash4_Midpoint
                 return genIncorrectResponse("getItems", "addingError", "could not add item");
             }
         }
-
-        //public static XElement removeItems(XElement requestCommand, User opUser, MySqlHandle mySqlHandle) { }
         public static XElement addFavItem(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
         {
             string errormsg = "";
@@ -399,6 +494,43 @@ namespace Meditrash4_Midpoint
             catch (Exception ex)
             {
                 return genIncorrectResponse("trashItem", "addingError", "could not add record");
+            }
+        }
+        public static XElement removeRecord(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
+        {
+            string errormsg = "";
+            try
+            {
+                requestCommand.Elements("id").ToList().ForEach(x =>
+                {
+                    int recordId = int.Parse(x.Value);
+                    List<Records> record = mySqlHandle.GetObjectList<Records>(
+                        "uid = @uid",
+                        new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                            { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "uid",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,recordId))});
+                    record.ForEach(x =>
+                    {
+                        try
+                        {
+                            mySqlHandle.removeObject(x);
+                        }
+                        catch (Exception e)
+                        {
+                            errormsg += "addError: " + record[0].uid + '\n';
+                        }
+                    });
+                });
+                XElement rootRes = new XElement("requestCommand");
+                rootRes.SetAttributeValue("name", "removeRecord");
+                return new XElement("Request",
+                    rootRes,
+                    new XElement("Message", "items were removed" + errormsg));
+            }
+            catch (Exception ex)
+            {
+                return genIncorrectResponse("removeRecord", "addingError", "could not remove item" + errormsg);
             }
         }
         public static XElement getTrashItem(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
