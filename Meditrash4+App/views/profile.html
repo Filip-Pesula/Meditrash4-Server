@@ -94,7 +94,7 @@
 
         async function showPasswordChange() {
             const html =
-            `
+                `
             <div id="passwordChangeView">
             <div class="mb-3 row">
                     <label id="passwordLabel" for="inputPassword" class="col-sm-4 col-form-label">Nové Heslo</label>
@@ -127,13 +127,13 @@
 
         async function hidePasswordChange() {
             const html =
-            `
+                `
                 <div id="passwordView" class="mb-3 row">
                         <label id="passwordLabel" for="inputPassword" class="col-sm-4 col-form-label">Heslo</label>
                         <div class="col-sm-8">
                             <div class="input-group">
                                 <input id="inputPassword" type="password" class="form-control"
-                                    aria-describedby="changePassword">
+                                    aria-describedby="changePassword" disabled readonly>
                                 <button id="passwordChangeButton" class="btn btn-outline-primary" type="button"
                                     id="changePassword" onclick="showPasswordChange()">Upravit</button>
                             </div>
@@ -144,6 +144,7 @@
 
             document.getElementById('passwordChangeView').insertAdjacentHTML('afterEnd', html);
             document.getElementById('passwordChangeView').remove();
+            document.getElementById('inputPassword').value = 'placeholder';
         }
 
         async function changePassword() {
@@ -151,23 +152,30 @@
             const newPasswordCheck = document.getElementById('inputPasswordCheck').value;
 
             if (newPassword.length < 5 || newPasswordCheck < 5) {
-                displayErrorBanner("warning", "Heslo musí mít alespoň 5 znaků");
+                displayBanner("warning", "Heslo musí mít alespoň 5 znaků");
             }
 
             if (newPassword === newPasswordCheck) {
                 try {
-                    const result = await window.serverRequests.editPassword({password: newPassword});
+                    const result = await window.serverRequests.editPassword({ password: newPassword });
+
+                    if (result) {
+                        displayBanner("info", "Heslo bylo změněno");
+
+                    }
+
+                    hidePasswordChange()
                 } catch (error) {
-                    displayErrorBanner("danger", error.message);
+                    displayBanner("danger", error.message);
                 }
             } else {
-                displayErrorBanner("warning", "Hesla se neshodují");
+                displayBanner("warning", "Hesla se neshodují");
             }
         }
 
-        function displayErrorBanner(type, message) {
-            const html = 
-            `<div id="errorBanner" class="row align-items-center"><div class="col"></div>
+        function displayBanner(type, message) {
+            const html =
+                `<div id="errorBanner" class="row align-items-center"><div class="col"></div>
             <div class="alert alert-${type} shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5" role="alert">${message}</div>
             <div class="col"></div></div>`;
 
@@ -211,83 +219,85 @@
             </div>
         </div>
     </nav>
-    <div  id="mainCard"class="row align-items-center">
-        <div class="col"></div>
-        <div class="card p-0 shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5">
-            <div class="card-header">
-                <h3 class="m-0">Profil</h3>
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <h5 class="card-title">Uživatelské údaje</h5>
-                    <div class="mb-3 row">
-                        <label for="personalNumber" class="col-sm-4 col-form-label">Rodné číslo</label>
-                        <div class="col-sm-8">
-                            <input type="text" readonly class="form-control-plaintext" id="personalNumber">
-                        </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label for="username" class="col-sm-4 col-form-label">Uživatelské jméno</label>
-                        <div class="col-sm-8">
+    <div class="container-fluid">
+        <div id="mainCard" class="row align-items-center">
+            <div class="col"></div>
+            <div class="card p-0 shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5">
+                <div class="card-header">
+                    <h3 class="m-0">Profil</h3>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <h5 class="card-title">Uživatelské údaje</h5>
+                        <div class="mb-3 row">
+                            <label for="personalNumber" class="col-sm-4 col-form-label">Rodné číslo</label>
                             <div class="col-sm-8">
-                                <input type="text" readonly class="form-control-plaintext" id="username">
+                                <input type="text" readonly class="form-control-plaintext" id="personalNumber">
                             </div>
                         </div>
-                    </div>
-                    <div id="passwordView" class="mb-3 row">
-                        <label id="passwordLabel" for="inputPassword" class="col-sm-4 col-form-label">Heslo</label>
-                        <div class="col-sm-8">
-                            <div class="input-group">
-                                <input id="inputPassword" type="password" class="form-control"
-                                    aria-describedby="changePassword">
-                                <button id="passwordChangeButton" class="btn btn-outline-primary" type="button"
-                                    id="changePassword" onclick="showPasswordChange()">Upravit</button>
+                        <div class="mb-3 row">
+                            <label for="username" class="col-sm-4 col-form-label">Uživatelské jméno</label>
+                            <div class="col-sm-8">
+                                <div class="col-sm-8">
+                                    <input type="text" readonly class="form-control-plaintext" id="username">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label for="firstname" class="col-sm-4 col-form-label">Jméno</label>
-                        <div class="col-sm-8">
-                            <input type="text" readonly class="form-control-plaintext" id="firstname">
+                        <div id="passwordView" class="mb-3 row">
+                            <label id="passwordLabel" for="inputPassword" class="col-sm-4 col-form-label">Heslo</label>
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                    <input id="inputPassword" type="password" class="form-control"
+                                        aria-describedby="changePassword">
+                                    <button id="passwordChangeButton" class="btn btn-outline-primary" type="button"
+                                        id="changePassword" onclick="showPasswordChange()">Upravit</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label for="lastname" class="col-sm-4 col-form-label">Příjmení</label>
-                        <div class="col-sm-8">
-                            <input type="text" readonly class="form-control-plaintext" id="lastname">
+                        <div class="mb-3 row">
+                            <label for="firstname" class="col-sm-4 col-form-label">Jméno</label>
+                            <div class="col-sm-8">
+                                <input type="text" readonly class="form-control-plaintext" id="firstname">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label for="department" class="col-sm-4 col-form-label">Oddělení</label>
-                        <div class="col-sm-8">
-                            <input type="text" readonly class="form-control-plaintext" id="department">
+                        <div class="mb-3 row">
+                            <label for="lastname" class="col-sm-4 col-form-label">Příjmení</label>
+                            <div class="col-sm-8">
+                                <input type="text" readonly class="form-control-plaintext" id="lastname">
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3 row">
-                        <label for="rights" class="col-sm-4 col-form-label">Typ účtu</label>
-                        <div class="col-sm-8">
-                            <input type="text" readonly class="form-control-plaintext" id="rights">
+                        <div class="mb-3 row">
+                            <label for="department" class="col-sm-4 col-form-label">Oddělení</label>
+                            <div class="col-sm-8">
+                                <input type="text" readonly class="form-control-plaintext" id="department">
+                            </div>
                         </div>
-                    </div>
-                </li>
-                <li class="list-group-item">
-                    <h5 class="card-title">Nastavení pracovních položek</h5>
+                        <div class="mb-3 row">
+                            <label for="rights" class="col-sm-4 col-form-label">Typ účtu</label>
+                            <div class="col-sm-8">
+                                <input type="text" readonly class="form-control-plaintext" id="rights">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <h5 class="card-title">Nastavení pracovních položek</h5>
 
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Název</th>
-                                <th scope="col"></th>
-                            </tr>
-                        </thead>
-                        <tbody id='favouriteItemsTab'></tbody>
-                    </table>
-                    <input class="btn btn-primary" type="button" value="Uložit změny" onclick="updateFavItems()">
-                </li>
-            </ul>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Název</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id='favouriteItemsTab'></tbody>
+                        </table>
+                        <input class="btn btn-primary" type="button" value="Uložit změny" onclick="updateFavItems()">
+                    </li>
+                </ul>
+            </div>
+            <div class="col"></div>
         </div>
-        <div class="col"></div>
     </div>
 </body>
 

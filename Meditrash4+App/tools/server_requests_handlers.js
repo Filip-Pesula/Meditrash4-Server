@@ -103,6 +103,17 @@ module.exports = class RequestsHandler {
             return this.writeData(data);
         });
 
+        this.#ipcInstance.handle('get_records', async (event, arg) => {
+            const data = RequestAssembler.createThreshRecordsRequest(
+                this.#dataStore.getSharedDataObj().user.token, arg.startDate, arg.endDate, arg.category);
+            return this.writeData(data);
+        });
+
+        this.#ipcInstance.handle('get_cathegories', async (event, arg) => {
+            const data = RequestAssembler.createCathegoriesListRequest(this.#dataStore.getSharedDataObj().user.token);
+            return this.writeData(data);
+        });
+
         this.#ipcInstance.handle('get_fav_list', async (event, arg) => {
             const data = RequestAssembler.createFavListAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
             this.#dataStore.getSharedDataObj().user.favItems = await this.writeData(data);

@@ -10,7 +10,30 @@
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
     <script>
+        window.onload = async () => {
+            const cathegories = await window.serverRequests.getCathegories();
 
+            for (const category of cathegories) {
+                document.getElementById('category').insertAdjacentHTML(
+                    'beforeend',
+                    `<option value="${category.id}">${category.name}</option>`
+                )
+            }
+        }
+
+        async function getRecords() {
+            const startDateInput = document.getElementById('from').value;
+            const endDateInput = document.getElementById('to').value;
+
+            const startDate = (startDateInput == '') ? new Date('2000-01-01') : new Date(startDateInput);
+            const endDate = (endDateInput == '') ? new Date() : new Date(endDateInput);
+
+            const category = document.getElementById('category').value;
+
+            const data = await window.serverRequests.getRecords({startDate, endDate, category});
+
+            console.log(data);
+        }
     </script>
 </head>
 
@@ -64,25 +87,19 @@
                     <div class="col-sm-9">
                         <label for="category" class="col-sm-12 col-form-label">Kategorie</label>
                         <div class="col-sm-12">
-                            <select id="category" class="form-select" aria-label="Default select example">
-                                <option selected>Open this select menu</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
-                            </select>
+                            <select id="category" class="form-select" aria-label="Default select example"></select>
                         </div>
                         <label for="grouping" class="col-sm-12 col-form-label">Seskupit</label>
                         <div class="col-sm-12">
                             <select id="grouping" class="form-select" aria-label="Default select example">
-                                <option selected>Open this select menu</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
+                                <option value="1" selected>Podle týdnů</option>
+                                <option value="2" selected>Podle měsíců</option>
+                                <option value="3" selected>Podle roků</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary">Zobrazit</button>
+                <button type="button" class="btn btn-primary" onclick="getRecords()">Zobrazit</button>
             </div>
         </div>
         <div class="col"></div>
@@ -108,7 +125,8 @@
                             <td>5</td>
                             <td>8. 1. 2022</td>
                             <td>jehla</td>
-                            <td>Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na prevenci infekce</td>
+                            <td>Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na
+                                prevenci infekce</td>
                             <td>1</td>
                             <td>5</td>
                             <td><button type="button" class="btn btn-danger btn-sm">Smazat</button></td>
@@ -121,8 +139,8 @@
     </div>
     <div class="row align-items-center">
         <div class="col"></div>
-        <div id="error_alert"
-            class="alert alert-danger shadow invisible col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7" role="alert">
+        <div id="error_alert" class="alert alert-danger shadow invisible col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7"
+            role="alert">
         </div>
         <div class="col"></div>
     </div>
