@@ -489,19 +489,11 @@ namespace Meditrash4_Midpoint
                 requestCommand.Elements("cathegory").ToList().ForEach(cathegory =>
                 {
                     int intVal = int.Parse(cathegory.Element("id").Value);
-                    List<Cathegory> cathegory1 = mySqlHandle.GetObjectList<Cathegory>(
-                        "id = @id",
-                        new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>{
-                                    new(
-                                        "@id",
-                                        new(MySqlDbType.Int32,intVal))});
-                    if (cathegory1.Count == 0)
-                        return;
-                    
                     mySqlHandle.querry(
                         @"update records
-                        SET DeStoreRecords_uid = (SELECT uid FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords)) where uid in (select * from (select R.uid  from odpad  LEFT join records R on odpad.uid = R.Odpad_uid where TrashCathegody_id = 180101 AND DeStoreRecords_uid = null ) AS X);"
-                        ,new());
+                        SET DeStoreRecords_uid = (SELECT uid FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords)) where uid in (select * from (select R.uid  from odpad  LEFT join records R on odpad.uid = R.Odpad_uid where TrashCathegody_id = @cathegory AND DeStoreRecords_uid = null ) AS X);"
+                        ,
+                        new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@cathegory", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32, intVal)) });
                 });
 
                 XElement rootRes = new XElement("requestCommand");
