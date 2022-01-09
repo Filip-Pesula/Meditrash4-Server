@@ -10,8 +10,13 @@
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
     <script>
+        let categories = [];
+        let startDateInput = null;
+        let endDateInput = null;
+        let category = null;
+
         window.onload = async () => {
-            const cathegories = await window.serverRequests.getCathegories();
+            cathegories = await window.serverRequests.getCathegories();
 
             for (const category of cathegories) {
                 document.getElementById('category').insertAdjacentHTML(
@@ -21,18 +26,60 @@
             }
         }
 
-        async function getRecords() {
-            const startDateInput = document.getElementById('from').value;
-            const endDateInput = document.getElementById('to').value;
+        function removeRecord(recordId) {
+            window.serverRequests.removeRecord({ records: [{ id: recordId }] });
+            getRecords(true);
+        }
+
+        async function createTable(title, data) {
+            document.getElementById('recordsCard').classList.remove('invisible');
+
+            document.getElementById('records').insertAdjacentHTML('afterBegin',
+                `<h4 class="mb-2">${title}</h4>
+                <table id="${title.replace(' ', '_')}" class="table align-middle"><thead>
+                    <th scope="col" style="width: 10%">UID</th>
+                    <th scope="col" style="width: 15%">Datum</th>
+                    <th scope="col" style="width: 15%">Název</th>
+                    <th scope="col" style="width: 35%">Kategorie</th>
+                    <th scope="col" style="width: 15%">Hmotnost (g)</th>
+                    <th scope="col" style="width: 10%"></th>    
+                </thead><tbody></tbody></table>`);
+
+            for (record of data) {
+                const html =
+                    `<tr>
+                    <td>${record.recordId}</td><td>${new Date(record.storageDate).toLocaleDateString()}</td><td>${record.odpadName}</td>
+                    <td>${record.cathegoryName}</td><td>${record.amount}</td>
+                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRecord(${record.recordId})">Smazat</button></td>
+                </tr>`;
+
+                document.getElementById(title.replace(' ', '_')).childNodes[1].insertAdjacentHTML('afterBegin', html);
+            }
+        }
+
+        async function getRecords(takeSavedValues) {
+            document.getElementById('recordsCard').classList.add('ivisible');
+            document.getElementById('records').childNodes.forEach(childNode => childNode.remove());
+
+            if (!takeSavedValues) {
+                startDateInput = document.getElementById('from').value;
+                endDateInput = document.getElementById('to').value;
+                category = document.getElementById('category').value;
+            }
 
             const startDate = (startDateInput == '') ? new Date('2000-01-01') : new Date(startDateInput);
             const endDate = (endDateInput == '') ? new Date() : new Date(endDateInput);
 
-            const category = document.getElementById('category').value;
+            const data = await window.serverRequests.getRecords({ startDate, endDate, category });
 
-            const data = await window.serverRequests.getRecords({startDate, endDate, category});
+            if (data === null) {
+                document.getElementById('recordsCard').classList.remove('invisible');
+                document.getElementById('records').insertAdjacentHTML(
+                    'afterBegin', `<h4 class="mb-0 text-center">Zvoleným parametrům neodpovídají žádné záznamy</h4>`);
+                return;
+            }
 
-            console.log(data);
+            createTable('Tabulka záznamů', data);
         }
     </script>
 </head>
@@ -74,65 +121,36 @@
             <div class="card-body">
                 <h4 class="card-title mb-3">Přehled záznamů</h4>
                 <div class="mb-3 row">
+
                     <div class="col-sm-3">
-                        <label for="from" class="col-sm-12 col-form-label">Od</label>
-                        <div class="col-sm-12">
+                        <label for="from" class="col-form-label">Od</label>
+                        <div class="">
                             <input type="date" class="form-control" id="from">
                         </div>
-                        <label for="to" class="col-sm-12 col-form-label">Do</label>
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="to" class="col-sm-3 col-form-label">Do</label>
                         <div class="col-sm-12">
                             <input type="date" class="form-control" id="to">
                         </div>
                     </div>
-                    <div class="col-sm-9">
+                    <div class="col-sm-6">
                         <label for="category" class="col-sm-12 col-form-label">Kategorie</label>
                         <div class="col-sm-12">
-                            <select id="category" class="form-select" aria-label="Default select example"></select>
-                        </div>
-                        <label for="grouping" class="col-sm-12 col-form-label">Seskupit</label>
-                        <div class="col-sm-12">
-                            <select id="grouping" class="form-select" aria-label="Default select example">
-                                <option value="1" selected>Podle týdnů</option>
-                                <option value="2" selected>Podle měsíců</option>
-                                <option value="3" selected>Podle roků</option>
-                            </select>
+                            <select id="category" class="form-select"></select>
                         </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="getRecords()">Zobrazit</button>
+                <button type="button" class="btn btn-primary" onclick="getRecords(false)">Zobrazit</button>
             </div>
         </div>
         <div class="col"></div>
     </div>
-    <div class="row align-items-center">
+    <div id='recordsCard' class="row align-items-center invisible">
         <div class="col"></div>
         <div class="card shadow col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7  mt-5">
-            <div class="card-body">
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col" style="width: 10%">UID</th>
-                            <th scope="col" style="width: 10%">Datum</th>
-                            <th scope="col" style="width: 15%">Název</th>
-                            <th scope="col" style="width: 30%">Kategorie</th>
-                            <th scope="col" style="width: 10%">Množství</th>
-                            <th scope="col" style="width: 15%">Hmotnost (g)</th>
-                            <th scope="col" style="width: 10%"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>5</td>
-                            <td>8. 1. 2022</td>
-                            <td>jehla</td>
-                            <td>Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na
-                                prevenci infekce</td>
-                            <td>1</td>
-                            <td>5</td>
-                            <td><button type="button" class="btn btn-danger btn-sm">Smazat</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div id='records' class="card-body">
+
             </div>
         </div>
         <div class="col"></div>

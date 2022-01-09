@@ -116,6 +116,21 @@ class RequestAssembler {
         return root.end({ pretty: true });
     }
 
+
+    static createRecordRemovalRequest(token, records) {
+        let root = xmlbuilder.create('Request');
+
+        root.ele('uniqueToken', token);
+
+        let requestCommand = root.ele('requestCommand', { name: 'removeRecord' });
+
+        for (let record of records) {
+            requestCommand.ele('id', record.id)
+        }
+
+        return root.end({ pretty: true });
+    }
+
     static createPasswordEditRequest(token, password) {
         let root = xmlbuilder.create('Request');
 
@@ -160,9 +175,6 @@ class RequestAssembler {
         root.ele('uniqueToken', token);
 
         let requestCommand = root.ele('requestCommand', { name: 'getTrashItem' });
-
-        console.log(startDate);
-        console.log(endDate);
 
         requestCommand.ele('catheory', category);
         requestCommand.ele('yearStart', startDate.getFullYear());
@@ -259,7 +271,11 @@ class ResponseParser {
         const dataObject = await xml2js.parseStringPromise(response.toString());
         let records = [];
 
-        console.log(dataObject)
+        if (dataObject.Request.requestCommand[0].record === undefined) return null;
+
+        for (const record of dataObject.Request.requestCommand[0].record) {
+            records.push(record.$);
+        }
 
         return records;
     }
