@@ -10,29 +10,37 @@ namespace Meditrash4_Midpoint
     {
         public static void LogE(String s,Exception e)
         {
+#if DEBUG
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(s);
             Console.Write(" ");
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine(e.ToString());
             Console.ForegroundColor = ConsoleColor.White;
+#endif
         }
         public static void LogE(Exception e)
         {
+#if DEBUG
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(e.ToString());
             Console.ForegroundColor = ConsoleColor.White;
+#endif
         }
         public static void Log(String s)
         {
+#if DEBUG
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(s);
+#endif
         }
         public static void Log(String s, ConsoleColor color)
         {
+#if DEBUG
             Console.ForegroundColor = color;
             Console.WriteLine(s);
             Console.ForegroundColor = ConsoleColor.White;
+#endif
         }
         public static void drawMenuHeader(bool isRoot,bool connected)
         {

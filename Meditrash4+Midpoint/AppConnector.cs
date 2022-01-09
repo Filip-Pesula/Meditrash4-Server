@@ -54,14 +54,16 @@ namespace Meditrash4_Midpoint
         private void ProccesConnection(Object stateInflo)
         {
             TcpClient client = (TcpClient)stateInflo;
-            Console.WriteLine(client.Client.RemoteEndPoint.ToString());
+            Logger.Log(client.Client.RemoteEndPoint.ToString(), ConsoleColor.Cyan);
+
             NetworkStream networkStream = client.GetStream();
             String message = "";
             try
             {
                 message = read(networkStream, 5000);
                 XDocument doc = XDocument.Parse(message);
-                Console.WriteLine(doc.ToString());
+                Logger.Log(doc.ToString(),ConsoleColor.DarkBlue);
+               
                 switch (doc.Root.Name.LocalName)
                 {
                     case "Login":
@@ -122,7 +124,7 @@ namespace Meditrash4_Midpoint
                             }
                                 
                             XDocument rootDoc = new XDocument(new XDeclaration("1.0", "UTF-8", null), body);
-                            Console.WriteLine(rootDoc.ToString());
+                            Logger.Log(rootDoc.ToString(), ConsoleColor.Magenta);
                             byte[] ansB = System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString());
                             networkStream.Write(
                                 ansB,
@@ -153,7 +155,7 @@ namespace Meditrash4_Midpoint
                                 response = processRequest(doc, user);
                             }
                             XDocument rootDoc = new XDocument(new XDeclaration("1.0","UTF-8",null), response);
-                            Console.WriteLine(rootDoc.ToString());
+                            Logger.Log(rootDoc.ToString(), ConsoleColor.Magenta);
                             byte[] ansB = System.Text.Encoding.UTF8.GetBytes(rootDoc.ToString());
                             networkStream.Write(
                                 ansB,
@@ -169,15 +171,14 @@ namespace Meditrash4_Midpoint
             catch (Exception e)
             {
                 Logger.LogE("parse error:", e);
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine(message);
-                Console.ForegroundColor = ConsoleColor.White;
+                Logger.Log(message, ConsoleColor.Blue);
             }
 
             // Process the connection here. (Add the client to a
             // server table, read data, etc.)
             client.Close();
-            Console.WriteLine("Client connected completed");
+            Logger.Log("Client connected completed", ConsoleColor.Green);
+           
         }
 
         private XElement processRequest(XDocument doc, User opUser)

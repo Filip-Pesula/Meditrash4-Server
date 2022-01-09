@@ -91,24 +91,7 @@ namespace Meditrash4_Midpoint
             });
             return errorList;
         }
-        public List<object> querry(string querry, int max = -1)
-        {
-            MySqlCommand cmd = new MySqlCommand(querry, conn);
-            MySqlDataReader resultReader = cmd.ExecuteReader();
-            List<object> returnVals = new List<object>();
-            Console.WriteLine("usersFCount" + resultReader.FieldCount);
-            if (resultReader.HasRows) {
-                while (resultReader.Read())
-                {
-                    for (int i = 0; i < resultReader.FieldCount; i++)
-                    {
-                        Console.WriteLine("usrType: " + resultReader.GetFieldType(i));
-                    }
-                }
-            }
-            resultReader.Close();
-            return returnVals;
-        }
+
         public List<List<KeyValuePair<Type, object>>> querry(string querry,List<KeyValuePair<string, KeyValuePair<MySqlDbType,object>>> parms, int max = -1)
         {
             MySqlCommand cmd = new MySqlCommand(querry, conn);
@@ -118,7 +101,6 @@ namespace Meditrash4_Midpoint
             }
             MySqlDataReader resultReader = cmd.ExecuteReader();
             List < List <KeyValuePair<Type, object>>> returnVals = new List<List<KeyValuePair<Type, object>>>();
-            Console.WriteLine("usersFCount" + resultReader.FieldCount);
             if (resultReader.HasRows) {
                 while (resultReader.Read())
                 {
@@ -278,7 +260,7 @@ namespace Meditrash4_Midpoint
             MySqlCommand cmd;
 
             cmd = new MySqlCommand(@"-- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2022-01-08 16:27:50.202
+-- Last modification date: 2022-01-09 11:16:09.841
 
 -- foreign keys
 ALTER TABLE ExportRecords
@@ -322,11 +304,13 @@ DROP TABLE TrashCathegody;
 
 DROP TABLE User;
 
--- End of file.", conn);
+-- End of file.
+
+", conn);
             cmd.ExecuteNonQuery();
             cmd = new MySqlCommand(
 @"-- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2022-01-08 16:27:50.202
+-- Last modification date: 2022-01-09 11:16:09.841
 
 -- tables
 -- Table: Department
@@ -408,40 +392,50 @@ CREATE TABLE User (
 -- Reference: DeStoreRecords_RespPerson (table: ExportRecords)
 ALTER TABLE ExportRecords ADD CONSTRAINT DeStoreRecords_RespPerson FOREIGN KEY DeStoreRecords_RespPerson (RespPerson_ico)
     REFERENCES RespPerson (ico)
-    ON DELETE RESTRICT;
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE;
 
 -- Reference: Odpad_TrashCathegody (table: Odpad)
 ALTER TABLE Odpad ADD CONSTRAINT Odpad_TrashCathegody FOREIGN KEY Odpad_TrashCathegody (TrashCathegody_id)
     REFERENCES TrashCathegody (id)
-    ON DELETE RESTRICT;
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE;
 
 -- Reference: Odpad_User_Settings_Odpad (table: Odpad_User_Settings)
 ALTER TABLE Odpad_User_Settings ADD CONSTRAINT Odpad_User_Settings_Odpad FOREIGN KEY Odpad_User_Settings_Odpad (Odpad_uid)
-    REFERENCES Odpad (uid);
+    REFERENCES Odpad (uid)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
 
 -- Reference: Odpad_User_Settings_User (table: Odpad_User_Settings)
 ALTER TABLE Odpad_User_Settings ADD CONSTRAINT Odpad_User_Settings_User FOREIGN KEY Odpad_User_Settings_User (User_rodCislo)
-    REFERENCES User (rodCislo);
+    REFERENCES User (rodCislo)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
 
 -- Reference: Records_DeStoreRecords (table: Records)
 ALTER TABLE Records ADD CONSTRAINT Records_DeStoreRecords FOREIGN KEY Records_DeStoreRecords (DeStoreRecords_uid)
     REFERENCES ExportRecords (uid)
-    ON DELETE RESTRICT;
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT;
 
 -- Reference: Records_Odpad (table: Records)
 ALTER TABLE Records ADD CONSTRAINT Records_Odpad FOREIGN KEY Records_Odpad (Odpad_uid)
     REFERENCES Odpad (uid)
-    ON DELETE RESTRICT;
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE;
 
 -- Reference: Records_User (table: Records)
 ALTER TABLE Records ADD CONSTRAINT Records_User FOREIGN KEY Records_User (User_rodCislo)
     REFERENCES User (rodCislo)
-    ON DELETE RESTRICT;
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE;
 
 -- Reference: User_Department (table: User)
 ALTER TABLE User ADD CONSTRAINT User_Department FOREIGN KEY User_Department (Department_uid)
     REFERENCES Department (uid)
-    ON DELETE SET NULL;
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
 
 -- End of file.
 ", conn);
@@ -467,7 +461,7 @@ values(254751000,2,'root','ROOT','admin',unhex(SHA2('root',256)),null);", conn);
             cmd.ExecuteNonQuery();
             cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180110,'Odpadní amalgám ze stomatologické péče');", conn);
             cmd.ExecuteNonQuery();
-            
+            /*
             cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180201,'Ostré předměty (kromě čísla 18 02 02)');", conn);
             cmd.ExecuteNonQuery();
             cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180202,'Odpady, na jejichž sběr a odstraňování jsou kladeny zvláštní požadavky s ohledem na prevenci infekce');", conn);
@@ -482,7 +476,7 @@ values(254751000,2,'root','ROOT','admin',unhex(SHA2('root',256)),null);", conn);
             cmd.ExecuteNonQuery();
             cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180208,'Jiná nepoužitelná léčiva neuvedená pod číslem 18 02 07');", conn);
             cmd.ExecuteNonQuery();
-
+            */
         }
         public static string genKeySelectCond<T>(T _object, MySqlCommand cmd) where T : MysqlReadable
         {

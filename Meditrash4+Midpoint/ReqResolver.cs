@@ -293,32 +293,33 @@ namespace Meditrash4_Midpoint
                 requestCommand.Elements("id").ToList().ForEach(x =>
                 {
                     int trashId = int.Parse(x.Value);
-                    List<Trash> trash = mySqlHandle.GetObjectList<Trash>(
-                        "uid = @uid",
+                    List<TrashFaw> trashFaw = mySqlHandle.GetObjectList<TrashFaw>(
+                        "Odpad_uid = @Odpad_uid",
                         new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
                             { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
-                                            "@uid",
+                                            "@Odpad_uid",
                                             new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,trashId))});
-                    TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
-                    mySqlHandle.saveObject(trashFaw);
-                    try
+                    trashFaw.ForEach(x =>
                     {
-                        mySqlHandle.saveObject(trashFaw);
-                    }
-                    catch (Exception e)
-                    {
-                        errormsg += "addError: " + trashFaw.odpad_uid + " " + trashFaw.user_rod_c + '\n';
-                    }
+                        try
+                        {
+                            mySqlHandle.removeObject(x);
+                        }
+                        catch (Exception e)
+                        {
+                            errormsg += "addError: " + trashFaw[0].odpad_uid + " " + trashFaw[0].user_rod_c + '\n';
+                        }
+                    });
                 });
                 XElement rootRes = new XElement("requestCommand");
                 rootRes.SetAttributeValue("name", "removeFavItem");
                 return new XElement("Request",
                     rootRes,
-                    new XElement("Message", "items were added" + errormsg));
+                    new XElement("Message", "items were removed" + errormsg));
             }
             catch (Exception ex)
             {
-                return genIncorrectResponse("deleteFavItem", "addingError", "could not add item" + errormsg);
+                return genIncorrectResponse("deleteFavItem", "addingError", "could not remove item" + errormsg);
             }
         }
         public static XElement getFavList(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
