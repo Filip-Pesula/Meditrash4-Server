@@ -20,7 +20,7 @@ module.exports = class RequestsHandler {
         client.on('data', async (response) => {
             try {
                 // will be replaced by universal funtion for various request types
-                const data = await ResponseParser.parseLoginResponse(response);
+                const data = await ResponseParser.parseResponse(response);
                 client.emit('data_prepared', data);
             } catch (e) {
                 client.emit('data_preparation_failure', e);
@@ -48,15 +48,19 @@ module.exports = class RequestsHandler {
         this.#ipcInstance.handle('evaluate_login_data', async (event, arg) => {
             const request = RequestAssembler.createLoginRequest(arg.name, arg.password);
             this.#dataStore.getSharedDataObj().user = await this.writeData(request);
+
             return {
-                firstname: this.#dataStore.getSharedDataObj().user.firstName,
-                lastname: this.#dataStore.getSharedDataObj().user.lastName,
-                rights: this.#dataStore.getSharedDataObj().user.rights,
+                personalNumber: this.#dataStore.getSharedDataObj().user.personalNumber,
+                username: this.#dataStore.getSharedDataObj().user.username,
+                firstname: this.#dataStore.getSharedDataObj().user.firstname,
+                lastname: this.#dataStore.getSharedDataObj().user.lastname,
+                department: this.#dataStore.getSharedDataObj().user.department,
+                rights: this.#dataStore.getSharedDataObj().user.rights
             };
         });
 
         this.#ipcInstance.handle('add_user', async (event, arg) => {
-            data = RequestAssembler.createUserAdditionRequest(
+            const data = RequestAssembler.createUserAdditionRequest(
                 arg.token, arg.department, arg.name, arg.password,
                 arg.rodCislo, arg.rights, arg.firstName, arg.lastName
             );
@@ -65,37 +69,38 @@ module.exports = class RequestsHandler {
         });
 
         this.#ipcInstance.handle('add_department', async (event, arg) => {
-            data = RequestAssembler.createDepartmentAdditionRequest(arg.token, arg.name);
+            const data = RequestAssembler.createDepartmentAdditionRequest(arg.token, arg.name);
             return this.writeData(data);
         });
 
         this.#ipcInstance.handle('add_cathegory', async (event, arg) => {
-            data = RequestAssembler.createCathegoryAdditionRequest();
+            const data = RequestAssembler.createCathegoryAdditionRequest();
             return this.writeData(data);
         });
 
         this.#ipcInstance.handle('add_item', async (event, arg) => {
-            data = RequestAssembler.createItemAdditionRequest(arg.token, arg.items);
+            const data = RequestAssembler.createItemAdditionRequest(arg.token, arg.items);
             return this.writeData(data);
         });
 
         this.#ipcInstance.handle('get_items', async (event, arg) => {
-            data = RequestAssembler.createItemsAcquiringRequest(arg.token);
+            const data = RequestAssembler.createItemsAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
             return this.writeData(data);
         });
 
         this.#ipcInstance.handle('add_fav_item', async (event, arg) => {
-            data = RequestAssembler.createFavItemAdditionRequest(arg.token, arg.items);
+            const data = RequestAssembler.createFavItemAdditionRequest(this.#dataStore.getSharedDataObj().user.token, arg.items);
             return this.writeData(data);
         });
 
         this.#ipcInstance.handle('get_fav_list', async (event, arg) => {
-            data = RequestAssembler.createFavListAcquiringRequest(arg.token);
-            return this.writeData(data);
+            const data = RequestAssembler.createFavListAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
+            this.#dataStore.getSharedDataObj().user.favItems = await this.writeData(data);
+            return this.#dataStore.getSharedDataObj().user.favItems;
         });
 
         this.#ipcInstance.handle('thrash_item', async (event, arg) => {
-            data = RequestAssembler.createThreshItemRequest();
+            const data = RequestAssembler.createThreshItemRequest(this.#dataStore.getSharedDataObj().user.token, arg.id, arg.count);
             return this.writeData(data);
         });
 

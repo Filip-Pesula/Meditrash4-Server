@@ -113,7 +113,20 @@ class RequestAssembler {
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
-    static createThreshItemRequest() { }
+    static createThreshItemRequest(token, id, count) {
+        const object_structure = {
+            Request: {
+                uniqueToken: { '#text': token },
+                requestCommand: {
+                    '@name': 'trashItem',
+                    id: { '#text': id },
+                    count: { '#text': count }
+                },
+            }
+        };
+
+        return xmlbuilder.create(object_structure).end({ pretty: true });
+    }
 
     static createRespPersonAdditionRequest() { }
 
@@ -121,6 +134,24 @@ class RequestAssembler {
 }
 
 class ResponseParser {
+
+    static async parseResponse(response) {
+        const dataObject = await xml2js.parseStringPromise(response.toString())
+        const rootElementName = Object.keys(dataObject)[0];
+
+        if (rootElementName === 'Login') {
+            return this.parseLoginResponse(response);
+        }
+
+        console.log(dataObject[rootElementName]);
+        const responseType = dataObject[rootElementName].RequestCommand[0].$.name;
+
+        switch (responseType) {
+            case 'getFavList': return this.parseFavListAcquiringResponse(response);
+            case 'getItems': return this.parseItemsAcquiringResponse(response);
+        }
+    }
+
     static async parseLoginResponse(response) {
         const dataObject = await xml2js.parseStringPromise(response.toString())
 
@@ -130,10 +161,35 @@ class ResponseParser {
 
         return {
             token: dataObject.Login.uniqueToken[0],
-            firstName: (dataObject.Login.firstName)[0],
-            lastName: dataObject.Login.lastName[0],
+            personalNumber: dataObject.Login.rodCislo[0],
+            username: dataObject.Login.userName[0],
+            firstname: dataObject.Login.firstName[0],
+            lastname: dataObject.Login.lastName[0],
+            department: dataObject.Login.department[0],
             rights: dataObject.Login.rights[0]
         };
+    }
+
+    static async parseFavListAcquiringResponse(response) {
+        const dataObject = await xml2js.parseStringPromise(response.toString());
+        let favItems = [];
+
+        for (const item of dataObject.Request.RequestCommand[0].item) {
+            favItems.push(item.$);
+        }
+
+        return favItems;
+    }
+
+    static async parseItemsAcquiringResponse(response) {
+        const dataObject = await xml2js.parseStringPromise(response.toString());
+        let items = [];
+
+        for (const item of dataObject.Request.RequestCommand[0].item) {
+            items.push(item.$);
+        }
+        
+        return items;
     }
 }
 
