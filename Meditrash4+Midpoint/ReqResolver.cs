@@ -588,6 +588,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("getTrashItem", "addingError", "could get records");
             }
         }
