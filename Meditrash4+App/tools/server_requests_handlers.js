@@ -98,6 +98,11 @@ module.exports = class RequestsHandler {
             return this.writeData(data);
         });
 
+        this.#ipcInstance.handle('remove_record', async (event, arg) => {
+            const data = RequestAssembler.createRecordRemovalRequest(this.#dataStore.getSharedDataObj().user.token, arg.records);
+            return this.writeData(data);
+        });
+
         this.#ipcInstance.handle('edit_password', async (event, arg) => {
             const data = RequestAssembler.createPasswordEditRequest(this.#dataStore.getSharedDataObj().user.token, arg.password);
             return this.writeData(data);
