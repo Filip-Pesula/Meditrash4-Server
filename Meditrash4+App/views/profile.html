@@ -156,7 +156,7 @@
 
             if (newPassword === newPasswordCheck) {
                 try {
-                    const result = await window.serverRequests.editPassword(newPassword);
+                    const result = await window.serverRequests.editPassword({password: newPassword});
                 } catch (error) {
                     displayErrorBanner("danger", error.message);
                 }
@@ -167,8 +167,8 @@
 
         function displayErrorBanner(type, message) {
             const html = 
-            `<div id="errorBanner" class="row align-items-center mb-3"><div class="col"></div>
-            <div class="alert alert-${type} shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5 mt-3" role="alert">${message}</div>
+            `<div id="errorBanner" class="row align-items-center"><div class="col"></div>
+            <div class="alert alert-${type} shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5" role="alert">${message}</div>
             <div class="col"></div></div>`;
 
             document.getElementById('mainCard').insertAdjacentHTML('beforeBegin', html);
