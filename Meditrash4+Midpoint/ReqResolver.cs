@@ -564,10 +564,10 @@ namespace Meditrash4_Midpoint
                     int.Parse(requestCommand.Element("monthEnd").Value),
                     int.Parse(requestCommand.Element("dayEnd").Value));
                 var data = mySqlHandle.querry(
-                   @"select records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from records 
-	                                LEFT JOIN odpad Rec_Odp on records.Odpad_uid = Rec_Odp.uid 
-                                    LEFT JOIN user Rec_Odp_User on Rec_Odp_User.rodCislo = records.User_rodCislo
-                                    LEFT JOIN trashcathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
+                   @"select Records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from Records 
+	                                LEFT JOIN Odpad Rec_Odp on Records.Odpad_uid = Rec_Odp.uid 
+                                    LEFT JOIN User Rec_Odp_User on Rec_Odp_User.rodCislo = Records.User_rodCislo
+                                    LEFT JOIN TrashCathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
 		                                where storageDate >= @dateStart AND storageDate <= @dateEnd AND Rec_Odp_User_Trc.id = @catheory"
                , new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> 
                { 
@@ -680,13 +680,13 @@ namespace Meditrash4_Midpoint
                 }
                 ExportRecords exportRecords = new ExportRecords(respPerson1[0].ico);
                 mySqlHandle.saveObject(exportRecords);
-                exportRecords = mySqlHandle.GetObjectList<ExportRecords>("uid = (SELECT MAX(uid) FROM exportrecords)", new())[0];
+                exportRecords = mySqlHandle.GetObjectList<ExportRecords>("uid = (SELECT MAX(uid) FROM ExportRecords)", new())[0];
                 requestCommand.Elements("cathegory").ToList().ForEach(cathegory =>
                 {
                     int intVal = int.Parse(cathegory.Element("id").Value);
                     mySqlHandle.querry(
                         @"update records
-                        SET DeStoreRecords_uid = (SELECT uid FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords)) where uid in (select * from (select R.uid  from odpad  LEFT join records R on odpad.uid = R.Odpad_uid where TrashCathegody_id = @cathegory AND DeStoreRecords_uid = null ) AS X);"
+                        SET DeStoreRecords_uid = (SELECT uid FROM ExportRecords WHERE uid=(SELECT MAX(uid) FROM ExportRecords)) where uid in (select * from (select R.uid  from Odpad  LEFT join Records R on Odpad.uid = R.Odpad_uid where TrashCathegody_id = @cathegory AND DeStoreRecords_uid = null ) AS X);"
                         ,
                         new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@cathegory", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32, intVal)) });
                 });
