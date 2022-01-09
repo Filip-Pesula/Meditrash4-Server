@@ -187,462 +187,59 @@ namespace Meditrash4_Midpoint
             switch (commandName.Value)
             {   
                 case "addUser":
-                    if (opUser.rights < 2)
-                    {
-                        return genIncorrectResponse("notPermitted", "not Permitted to this operation");
-                    }
-                    try
-                    {
-                        string department = requestCommand.Element("department").Value;
-                        List<Department> departments = mySqlHandle.GetObjectList<Department>("name= @name", 
-                            new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
-                                            "@name",
-                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,department))});
-                        if(departments.Count == 0)
-                        {
-                            return genIncorrectResponse("incorrectName", "department has incorrect name");
-                        }
-                        User user = new User(
-                            requestCommand.Element("name").Value,
-                            requestCommand.Element("password").Value,
-                            Int32.Parse(requestCommand.Element("rodCislo").Value),
-                            departments[0].id,
-                            Int32.Parse(requestCommand.Element("rights").Value),
-                            requestCommand.Element("firstName").Value,
-                            requestCommand.Element("lastName").Value
-                            );
-                        mySqlHandle.saveObject(user);
-                        return new XElement("Request", "user was Added");
-                    }
-                    catch(Exception ex)
-                    {
-                        return genIncorrectResponse("addingError","could not add user");
-                    }
+                    return ReqResolver.addUser(requestCommand,opUser,mySqlHandle);
                     break;
                 case "addDepartment":
-                    if (opUser.rights < 2)
-                    {
-                        return genIncorrectResponse("notPermitted", "not Permitted to this operation");
-                    }
-                    try
-                    {
-                        Department department = new Department(requestCommand.Element("name").Value);
-                        mySqlHandle.saveObject(department);
-                        return new XElement("Request", "department was Added");
-                    }
-                    catch (Exception ex)
-                    {
-                        return genIncorrectResponse("addingError", "could not add department");
-                    }
+                    return ReqResolver.addDepartment(requestCommand, opUser, mySqlHandle);
                     break;
                 case "removeDepartment":
-                    {
-                        if (opUser.rights < 2)
-                        {
-                            return genIncorrectResponse("notPermitted", "not Permitted to this operation");
-                        }
-                        XElement nameEl = requestCommand.Element("name");
-                        if (nameEl == null)
-                        {
-                            return genIncorrectResponse("missingArgument", "missing name");
-                        }
-                        String name = nameEl.Value;
-                        try
-                        {
-                            Department department = mySqlHandle.GetObjectList<Department>(
-                                "name = @name",
-                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
-                                            "@name",
-                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,name))})[0];
-                            mySqlHandle.removeObject(department);
-                            return new XElement("Request", "department was Added");
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("removingError", "could not add department");
-                        }
-                        break;
-                    }
+                    return ReqResolver.removeDepartment(requestCommand, opUser, mySqlHandle);
+                    break;
                 case "getDepartments":
-                    try
-                    {
-                        List<Department> departmentList = mySqlHandle.GetObjectList<Department>("true", new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>());
-                        XElement ansRoot = new XElement("Request");
-                        foreach (Department department in departmentList)
-                        {
-                            XElement item = new XElement("deepartment");
-                            item.SetAttributeValue("name", department.name);
-                            item.SetAttributeValue("id", department.id);
-                            ansRoot.Add(item);
-                        }
-                        return ansRoot;
-                    }
-                    catch (Exception ex)
-                    {
-                        return genIncorrectResponse("addingError", "could not get department List");
-                    }
+                    return ReqResolver.getDepartments(requestCommand, opUser, mySqlHandle);
                     break;
                 //only extention
                 case "addCathegory":
-                    {
-                        string errormsg = "";
-                        try
-                        {
-                            List<Cathegory> cathegories = new List<Cathegory>();
-                            requestCommand.Elements("cathegory").ToList().ForEach(x => cathegories.Add(
-                                new Cathegory(
-                                    int.Parse(x.Element("id").Value),
-                                    x.Element("name").Value)
-                                ));
-                            cathegories.ForEach(x =>
-                            {
-                                try
-                                {
-                                    mySqlHandle.saveObject(x);
-                                }
-                                catch (Exception e)
-                                {
-                                    errormsg += "addError" + e.Message + '\n';
-                                }
-                            });
-                            return new XElement("Request", "cathegory were added" + errormsg);
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add cathegory\n" + errormsg);
-                        }
-                        break;
-                    }
+                    return  ReqResolver.addCathegory(requestCommand, opUser, mySqlHandle);
+                    break;
                 case "getCathegories":
-                    {
-                        try
-                        {
-                            List<Cathegory> trashList = mySqlHandle.GetObjectList<Cathegory>("true", new());
-                            XElement ansRoot = new XElement("Request");
-                            foreach (Cathegory cathegory in trashList)
-                            {
-                                XElement item = new XElement("cathegory");
-                                item.SetAttributeValue("name", cathegory.name);
-                                item.SetAttributeValue("id", cathegory.id);
-                                ansRoot.Add(item);
-                            }
-                            return ansRoot;
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add item");
-                        }
-                        break;
-                    }
+                    return ReqResolver.getCathegories(requestCommand, opUser, mySqlHandle);
+                    break;
                 case "addItem":
-                    {
-                        string errormsg = "";
-                        try
-                        {
-                            List<Trash> trash = new List<Trash>();
-                            requestCommand.Elements("trash").ToList().ForEach(x => trash.Add(
-                                new Trash(
-                                    x.Element("name").Value,
-                                    int.Parse(x.Element("cathegory").Value),
-                                    int.Parse(x.Element("weight").Value))
-                                ));
-                            trash.ForEach(x =>
-                            {
-                                try
-                                {
-                                    mySqlHandle.saveObject(x);
-                                }
-                                catch(Exception e)
-                                {
-                                    errormsg += "addError" + e.Message + '\n';
-                                }
-                            });
-                            return new XElement("Request", "items were added" + errormsg);
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add item\n"+ errormsg);
-                        }
-                        break;
-                    }
+                    return ReqResolver.addItem(requestCommand, opUser, mySqlHandle);
+                    break;
                 case "getItems":
-                    {
-                        try
-                        {
-                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>("true",new());
-                            XElement ansRoot = new XElement("Request");
-                            foreach (Trash trash in trashList)
-                            {
-                                XElement item = new XElement("item");
-                                item.SetAttributeValue("name", trash.name);
-                                item.SetAttributeValue("id", trash.uid);
-                                item.SetAttributeValue("cathegory", trash.cathegory);
-                                item.SetAttributeValue("weight", trash.weight);
-                                ansRoot.Add(item);
-                            }
-                            return ansRoot;
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add item");
-                        }
-                        break;
-                    }
+                    return ReqResolver.getItems(requestCommand, opUser, mySqlHandle);
+                    break;
                 case "addFavItem":
-                    {
-                        string errormsg = "";
-                        try
-                        {
-                            requestCommand.Elements("id").ToList().ForEach(x =>
-                            {
-                                int trashId = int.Parse(x.Value);
-                                List<Trash> trash = mySqlHandle.GetObjectList<Trash>("uid = @uid", 
-                                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                                        { new(
-                                            "@uid",
-                                            new(MySqlDbType.VarChar,trashId))});
-                                TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
-                                mySqlHandle.saveObject(trashFaw);
-                                try
-                                {
-                                    mySqlHandle.saveObject(trashFaw);
-                                }
-                                catch (Exception e)
-                                {
-                                    errormsg += "addError" + e.Message + '\n';
-                                }
-                            });
-                            return new XElement("Request", "item was added" + errormsg);
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add item" + errormsg);
-                        }
-                        break;
-                    }
-                case "deleteFavItem":
-                    {
-                        string errormsg = "";
-                        try
-                        {
-                            requestCommand.Elements("id").ToList().ForEach(x =>
-                            {
-                                int trashId = int.Parse(x.Value);
-                                List<Trash> trash = mySqlHandle.GetObjectList<Trash>(
-                                    "uid = @uid",
-                                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> 
-                                        { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
-                                            "@uid",
-                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,trashId))});
-                                TrashFaw trashFaw = new TrashFaw(opUser.rod_cislo, trash[0].uid);
-                                mySqlHandle.saveObject(trashFaw);
-                                try
-                                {
-                                    mySqlHandle.saveObject(trashFaw);
-                                }
-                                catch (Exception e)
-                                {
-                                    errormsg += "addError" + e.Message + '\n';
-                                }
-                            });
-                            return new XElement("Request", "item was added" + errormsg);
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add item" + errormsg);
-                        }
-                        break;
-                    }
-                case "getFavList":{
-                        try
-                        {
-                            List<Trash> trashList = mySqlHandle.GetObjectList<Trash>(
-                                "uid in (select Odpad_uid from Odpad_User_Settings where User_rodCislo = @User_rodCislo )",
-                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                                        { new(
-                                            "@User_rodCislo",
-                                            new(MySqlDbType.Int64,opUser.rod_cislo))});
-
-                            XElement ansRoot =  new XElement("Request");
-                            XElement reqCommand = new XElement("RequestCommand");
-                            reqCommand.SetAttributeValue("name", "getFavList");
-                            foreach (Trash trash in trashList)
-                            {
-                                XElement item = new XElement("item");
-                                item.SetAttributeValue("name", trash.name);
-                                item.SetAttributeValue("id", trash.uid);
-                                reqCommand.Add(item);
-                            }
-                            ansRoot.Add(reqCommand);
-                            return ansRoot;
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add item");
-                        }
-                        break;
-                    }
-                case "trashItem":{
-                        try
-                        {
-                            int trashId = int.Parse(requestCommand.Element("id").Value);
-                            int trashCout = int.Parse(requestCommand.Element("count").Value);
-                            List<Trash> trash = mySqlHandle.GetObjectList<Trash>(
-                                "uid = @uid", 
-                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                                        { new(
-                                            "@uid",
-                                            new(MySqlDbType.Int32,trashId))});
-                            Records record = new Records(trashCout, trash[0].uid,opUser.rod_cislo);
-                            mySqlHandle.saveObject(record);
-                            return new XElement("Request", "record was added");
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add record");
-                        }
-                        break;
-                    }
+                    return ReqResolver.addFavItem(requestCommand, opUser, mySqlHandle);
+                    break;
+                case "removeFavItem":
+                    return ReqResolver.removeFavItem(requestCommand, opUser, mySqlHandle);
+                    break;
+                case "getFavList":
+                    return ReqResolver.getFavList(requestCommand, opUser, mySqlHandle);
+                    break;
+                case "trashItem":
+                    return ReqResolver.trashItem(requestCommand, opUser, mySqlHandle);
+                    break;
                 case "getTrashItem":
-                    {
-                        try
-                        {
-
-                            DateTime time = new DateTime(
-                                int.Parse(requestCommand.Element("year").Value), 
-                                int.Parse(requestCommand.Element("month").Value),
-                                int.Parse(requestCommand.Element("day").Value));
-                             var data = mySqlHandle.querry(
-                                @"select records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from records 
-	                                LEFT JOIN odpad Rec_Odp on records.Odpad_uid = Rec_Odp.uid 
-                                    LEFT JOIN user Rec_Odp_User on Rec_Odp_User.rodCislo = records.User_rodCislo
-                                    LEFT JOIN trashcathegody Rec_Odp_User_Trc on Rec_Odp_User_Trc.id = Rec_Odp.TrashCathegody_id
-		                                where storageDate > @date"
-                            ,new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> {  new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@date", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Date, time))  } );
-                            //time.ToString("yyyy-mm-dd")
-
-                            XElement ansRoot = new XElement("Request");
-                            XElement reqCommand = new XElement("RequestCommand");
-                            reqCommand.SetAttributeValue("name", "getTrashItem");
-
-                            data.ForEach(row =>
-                            {
-                                XElement item = new XElement("record");
-                                item.SetAttributeValue("recordId", row[0].Value);
-                                item.SetAttributeValue("cathegoryId", row[1].Value);
-                                item.SetAttributeValue("cathegoryName", row[2].Value);
-                                item.SetAttributeValue("storageDate", row[3].Value);
-                                item.SetAttributeValue("amount", row[4].Value);
-                                item.SetAttributeValue("odpadId", row[5].Value);
-                                item.SetAttributeValue("odpadName", row[6].Value);
-                                item.SetAttributeValue("userName", row[7].Value);
-                                reqCommand.Add(item);
-                            });
-                            ansRoot.Add(reqCommand);
-                            return ansRoot;
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could get records");
-                        }
-                        break;
-                    }
-                    //TODO
-                case "deleteTrashItem":{
-                        try
-                        {
-                            int trashId = int.Parse(requestCommand.Element("id").Value);
-                            List<Records> records = mySqlHandle.GetObjectList<Records>(
-                                "uid = @uid", 
-                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                                        { new(
-                                            "@uid",
-                                            new(MySqlDbType.Int32,trashId))});
-                            if (records.Count == 0) {
-                                return genIncorrectResponse("removingError", "item does not exist");
-                            }
-                            mySqlHandle.removeObject(records[0]);
-                            return new XElement("Request", "record was added");
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("removingError", "could not remove exist");
-                        }
-                        break;
-                    }
+                    return ReqResolver.getTrashItem(requestCommand, opUser, mySqlHandle);
+                    break;
+                //TODO
+                case "deleteTrashItem":
+                    return ReqResolver.deleteTrashItem(requestCommand, opUser, mySqlHandle);
+                    break;
                 //only extention
-                case "addRespPerson":{
-                        try
-                        {
-                            long ico = long.Parse(requestCommand.Element("ico").Value);
-                            string name = requestCommand.Element("name").Value;
-                            string ulice = requestCommand.Element("ulice").Value;
-                            int cislo_popisne = int.Parse(requestCommand.Element("cislo_popisne").Value);
-                            string mesto = requestCommand.Element("mesto").Value;
-                            int psc = int.Parse(requestCommand.Element("psc").Value);
-                            int zuj = int.Parse(requestCommand.Element("zuj").Value);
-
-
-
-                            RespPerson respPerson = new RespPerson(ico,name,ulice,cislo_popisne,mesto,psc,zuj);
-                            mySqlHandle.saveObject(respPerson);
-                            return new XElement("Request", "respPerson was added");
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add record");
-                        }
-                        break;
-                    }
+                case "addRespPerson":
+                    return ReqResolver.addRespPerson(requestCommand, opUser, mySqlHandle);
+                    break;
                 //TODO
                 case "exportTrashByCathegory":
-                    {
-                        try
-                        {
-                            XElement respPerson = requestCommand.Element("respPerson");
-                            int respPersonIco = int.Parse(respPerson.Element("ico").Value);
-                            List<RespPerson> respPerson1 = mySqlHandle.GetObjectList<RespPerson>(
-                                "ico = @ico", 
-                                new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>{ 
-                                    new(
-                                        "@ico",
-                                        new(MySqlDbType.Int64,respPersonIco))}
-                            );
-                            if (respPerson1.Count == 0)
-                                throw new Exception("Resp person does not exist");
-                            requestCommand.Elements("cathegory").ToList().ForEach(cathegory =>
-                            {
-                                int intVal = int.Parse(cathegory.Element("id").Value);
-                                List<Cathegory> cathegory1 = mySqlHandle.GetObjectList<Cathegory>(
-                                    "id = @id",
-                                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>{
-                                    new(
-                                        "@id",
-                                        new(MySqlDbType.Int32,intVal))});
-                                if (cathegory1.Count == 0)
-                                    return;
-                                ExportRecords exportRecords = new ExportRecords(respPerson1[0].ico);
-                                mySqlHandle.saveObject(exportRecords);
-                                //mySqlHandle.querry("U");
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            return genIncorrectResponse("addingError", "could not add record");
-                        }
-                        break;
-                    }
+                    return ReqResolver.exportTrashByCathegory(requestCommand, opUser, mySqlHandle);
+                    break;
             }
-            return genIncorrectResponse("UnknownCommand", "Unknown Command");
-        }
-        private XElement genIncorrectResponse(string errorType,string message)
-        {
-            XElement response = new XElement("RequestError", message);
-            response.SetAttributeValue("type", errorType);
-            return response;
+            return ReqResolver.genIncorrectResponse(commandName.Value,"UnknownCommand", "Unknown Command");
         }
         private uint processLogin(XDocument doc, User user)
         {

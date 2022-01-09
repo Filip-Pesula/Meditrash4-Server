@@ -275,15 +275,58 @@ namespace Meditrash4_Midpoint
         }
         public void reset()
         {
-            MySqlCommand cmd = new MySqlCommand("drop schema if exists " + MySqlHelper.EscapeString(conn.Database), conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("create schema " + MySqlHelper.EscapeString(conn.Database), conn);
-            cmd.ExecuteNonQuery();
-            cmd = new MySqlCommand("use " + MySqlHelper.EscapeString(conn.Database), conn);
+            MySqlCommand cmd;
+
+            cmd = new MySqlCommand(@"-- Created by Vertabelo (http://vertabelo.com)
+-- Last modification date: 2022-01-08 16:27:50.202
+
+-- foreign keys
+ALTER TABLE ExportRecords
+    DROP FOREIGN KEY DeStoreRecords_RespPerson;
+
+ALTER TABLE Odpad
+    DROP FOREIGN KEY Odpad_TrashCathegody;
+
+ALTER TABLE Odpad_User_Settings
+    DROP FOREIGN KEY Odpad_User_Settings_Odpad;
+
+ALTER TABLE Odpad_User_Settings
+    DROP FOREIGN KEY Odpad_User_Settings_User;
+
+ALTER TABLE Records
+    DROP FOREIGN KEY Records_DeStoreRecords;
+
+ALTER TABLE Records
+    DROP FOREIGN KEY Records_Odpad;
+
+ALTER TABLE Records
+    DROP FOREIGN KEY Records_User;
+
+ALTER TABLE User
+    DROP FOREIGN KEY User_Department;
+
+-- tables
+DROP TABLE Department;
+
+DROP TABLE ExportRecords;
+
+DROP TABLE Odpad;
+
+DROP TABLE Odpad_User_Settings;
+
+DROP TABLE Records;
+
+DROP TABLE RespPerson;
+
+DROP TABLE TrashCathegody;
+
+DROP TABLE User;
+
+-- End of file.", conn);
             cmd.ExecuteNonQuery();
             cmd = new MySqlCommand(
 @"-- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2021-12-06 20:29:45.937
+-- Last modification date: 2022-01-08 16:27:50.202
 
 -- tables
 -- Table: Department
@@ -332,7 +375,7 @@ CREATE TABLE Records (
 -- Table: RespPerson
 CREATE TABLE RespPerson (
     ico bigint NOT NULL,
-    name varchar(255) NOT NULL,
+    name varchar(50) NOT NULL,
     ulice varchar(50) NOT NULL,
     cislo_popisne int NOT NULL,
     mesto varchar(50) NOT NULL,
@@ -344,7 +387,7 @@ CREATE TABLE RespPerson (
 -- Table: TrashCathegody
 CREATE TABLE TrashCathegody (
     id int NOT NULL,
-    name varchar(255) NOT NULL,
+    name varchar(250) NOT NULL,
     CONSTRAINT TrashCathegody_pk PRIMARY KEY (id)
 );
 
@@ -364,11 +407,13 @@ CREATE TABLE User (
 -- foreign keys
 -- Reference: DeStoreRecords_RespPerson (table: ExportRecords)
 ALTER TABLE ExportRecords ADD CONSTRAINT DeStoreRecords_RespPerson FOREIGN KEY DeStoreRecords_RespPerson (RespPerson_ico)
-    REFERENCES RespPerson (ico);
+    REFERENCES RespPerson (ico)
+    ON DELETE RESTRICT;
 
 -- Reference: Odpad_TrashCathegody (table: Odpad)
 ALTER TABLE Odpad ADD CONSTRAINT Odpad_TrashCathegody FOREIGN KEY Odpad_TrashCathegody (TrashCathegody_id)
-    REFERENCES TrashCathegody (id);
+    REFERENCES TrashCathegody (id)
+    ON DELETE RESTRICT;
 
 -- Reference: Odpad_User_Settings_Odpad (table: Odpad_User_Settings)
 ALTER TABLE Odpad_User_Settings ADD CONSTRAINT Odpad_User_Settings_Odpad FOREIGN KEY Odpad_User_Settings_Odpad (Odpad_uid)
@@ -380,23 +425,25 @@ ALTER TABLE Odpad_User_Settings ADD CONSTRAINT Odpad_User_Settings_User FOREIGN 
 
 -- Reference: Records_DeStoreRecords (table: Records)
 ALTER TABLE Records ADD CONSTRAINT Records_DeStoreRecords FOREIGN KEY Records_DeStoreRecords (DeStoreRecords_uid)
-    REFERENCES ExportRecords (uid);
+    REFERENCES ExportRecords (uid)
+    ON DELETE RESTRICT;
 
 -- Reference: Records_Odpad (table: Records)
 ALTER TABLE Records ADD CONSTRAINT Records_Odpad FOREIGN KEY Records_Odpad (Odpad_uid)
-    REFERENCES Odpad (uid);
+    REFERENCES Odpad (uid)
+    ON DELETE RESTRICT;
 
 -- Reference: Records_User (table: Records)
 ALTER TABLE Records ADD CONSTRAINT Records_User FOREIGN KEY Records_User (User_rodCislo)
-    REFERENCES User (rodCislo);
+    REFERENCES User (rodCislo)
+    ON DELETE RESTRICT;
 
 -- Reference: User_Department (table: User)
 ALTER TABLE User ADD CONSTRAINT User_Department FOREIGN KEY User_Department (Department_uid)
-    REFERENCES Department (uid);
+    REFERENCES Department (uid)
+    ON DELETE SET NULL;
 
 -- End of file.
-
-
 ", conn);
             cmd.ExecuteNonQuery();
             cmd = new MySqlCommand(@"insert into User
