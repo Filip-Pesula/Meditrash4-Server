@@ -93,6 +93,11 @@ module.exports = class RequestsHandler {
             return this.writeData(data);
         });
 
+        this.#ipcInstance.handle('remove_fav_item', async (event, arg) => {
+            const data = RequestAssembler.createFavItemRemovalRequest(this.#dataStore.getSharedDataObj().user.token, arg.items);
+            return this.writeData(data);
+        });
+
         this.#ipcInstance.handle('get_fav_list', async (event, arg) => {
             const data = RequestAssembler.createFavListAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
             this.#dataStore.getSharedDataObj().user.favItems = await this.writeData(data);

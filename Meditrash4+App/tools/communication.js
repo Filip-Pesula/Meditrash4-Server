@@ -102,6 +102,20 @@ class RequestAssembler {
         return root.end({ pretty: true });
     }
 
+    static createFavItemRemovalRequest(token, items) {
+        let root = xmlbuilder.create('Request');
+
+        root.ele('uniqueToken', token);
+
+        let requestCommand = root.ele('requestCommand', { name: 'removeFavItem' });
+
+        for (let item of items) {
+            requestCommand.ele('id', item.id)
+        }
+
+        return root.end({ pretty: true });
+    }
+
     static createFavListAcquiringRequest(token) {
         const object_structure = {
             Request: {
@@ -143,8 +157,7 @@ class ResponseParser {
             return this.parseLoginResponse(response);
         }
 
-        console.log(dataObject[rootElementName]);
-        const responseType = dataObject[rootElementName].RequestCommand[0].$.name;
+        const responseType = dataObject[rootElementName].requestCommand[0].$.name;
 
         switch (responseType) {
             case 'getFavList': return this.parseFavListAcquiringResponse(response);
@@ -174,7 +187,9 @@ class ResponseParser {
         const dataObject = await xml2js.parseStringPromise(response.toString());
         let favItems = [];
 
-        for (const item of dataObject.Request.RequestCommand[0].item) {
+        if (dataObject.Request.requestCommand[0].item === undefined) return null;
+
+        for (const item of dataObject.Request.requestCommand[0].item) {
             favItems.push(item.$);
         }
 
@@ -185,7 +200,7 @@ class ResponseParser {
         const dataObject = await xml2js.parseStringPromise(response.toString());
         let items = [];
 
-        for (const item of dataObject.Request.RequestCommand[0].item) {
+        for (const item of dataObject.Request.requestCommand[0].item) {
             items.push(item.$);
         }
         

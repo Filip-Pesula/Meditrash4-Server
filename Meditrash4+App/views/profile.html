@@ -21,19 +21,21 @@
             document.getElementById('lastname').value = userData.lastname;
             document.getElementById('department').value = userData.department;
             document.getElementById('rights').value = userData.rights;
-   
+
             allItems = await window.serverRequests.getAllItems();
 
-            allItems.forEach(item => {
-                usersFavItems.forEach(favItem => {
-                    if (item.name === favItem.name) {
-                        item.isFav = true;
-                    }
+            if (userData.favItems !== null) {
+                allItems.forEach(item => {
+                    userData.favItems.forEach(favItem => {
+                        if (item.id === favItem.id) {
+                            item.isFav = true;
+                        }
+                    })
                 })
-            })
+            }
 
             allItems.forEach(item => {
-                const html = 
+                const html =
                     `<tr><td>${item.id}</td>
                     <td>${item.name}</td>
                     <td><input class="form-check-input" type="checkbox" value="" id="${item.id}-checkbox" 
@@ -41,6 +43,50 @@
 
                 document.getElementById('favouriteItemsTab').insertAdjacentHTML('beforeend', html);
             });
+        }
+
+        async function updateFavItems() {
+            let checkedItems = [];
+            let toBeAdded = [];
+            let toBeRemoved = [];
+
+            for (const node of document.getElementById('favouriteItemsTab').childNodes) {
+                const checked = node.childNodes[4].childNodes[0].checked;
+
+                if (checked) checkedItems.push(node.childNodes[0].innerHTML);
+            }
+
+            if (userData.favItems !== null) {
+                userData.favItems.forEach(favItem => {
+                    let isFavChecked = false;
+
+                    checkedItems.forEach(checkedItem => {
+                        if (favItem.id == checkedItem) {
+                            isFavChecked = true;
+                        }
+                    })
+
+                    if (!isFavChecked) toBeRemoved.push({ id: favItem.id });
+                })
+            }
+
+            checkedItems.forEach(checkedItem => {
+                let newFavItem = true;
+
+                if (userData.favItems !== null) {
+                    for (const favItem of userData.favItems) {
+                        if (favItem.id == checkedItem) {
+                            newFavItem = false;
+                        }
+                    }
+                }
+
+                if (newFavItem) toBeAdded.push({ id: checkedItem });
+            })
+
+            await window.serverRequests.addNewFavItems({ items: toBeAdded });
+            await window.serverRequests.removeFavItems({ items: toBeRemoved })
+            window.router.goToProfilePage();
         }
     </script>
 </head>
@@ -158,7 +204,7 @@
                         </thead>
                         <tbody id='favouriteItemsTab'></tbody>
                     </table>
-                    <input class="btn btn-primary" type="button" value="Uložit změny">
+                    <input class="btn btn-primary" type="button" value="Uložit změny" onclick="updateFavItems()">
                 </li>
             </ul>
         </div>

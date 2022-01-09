@@ -4,7 +4,9 @@ contextBridge.exposeInMainWorld('serverRequests', {
     evaluateFormData: (data) => ipcRenderer.invoke('evaluate_login_data', data),
     getUserFavItems: () => ipcRenderer.invoke('get_fav_list'),
     getAllItems: () => ipcRenderer.invoke('get_items'),
-    addNewThrashRecord: (data) => ipcRenderer.invoke('thrash_item', data)
+    addNewThrashRecord: (data) => ipcRenderer.invoke('thrash_item', data),
+    removeFavItems: (data) => ipcRenderer.invoke('remove_fav_item', data),
+    addNewFavItems: (data) => ipcRenderer.invoke('add_fav_item', data)
 })
 
 contextBridge.exposeInMainWorld('localData', {
