@@ -55,6 +55,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("addUser", "addingError", "could not add user");
             }
         }
@@ -88,6 +89,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("removeUser", "removingError", "could not add department");
             }
         }
@@ -112,6 +114,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("addUser", "addingError", "could not add user");
             }
         }
@@ -134,6 +137,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("addDepartment", "addingError", "could not add department");
             }
         }
@@ -167,6 +171,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("removeDepartment", "removingError", "could not add department");
             }
         }
@@ -190,6 +195,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("getDepartments", "addingError", "could not get department List");
             }
         }
@@ -222,6 +228,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("addCathegory", "addingError", "could not add cathegory\n" + errormsg);
             }
         }
@@ -255,6 +262,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("removeCathegory", "removingError", "could not add department");
             }
         }
@@ -277,6 +285,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("getCathegories", "addingError", "could not add item");
             }
         }
@@ -310,6 +319,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("addItem", "addingError", "could not add item\n" + errormsg);
             }
         }
@@ -343,6 +353,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("removeItem", "removingError", "could not add department");
             }
         }
@@ -367,6 +378,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("getItems", "addingError", "could not add item");
             }
         }
@@ -402,6 +414,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("addFavItem", "addingError", "could not add item" + errormsg);
             }
         }
@@ -439,6 +452,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("deleteFavItem", "addingError", "could not remove item" + errormsg);
             }
         }
@@ -467,6 +481,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("getFavList", "addingError", "could not add item");
             }
         }
@@ -493,6 +508,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("trashItem", "addingError", "could not add record");
             }
         }
@@ -530,6 +546,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("removeRecord", "addingError", "could not remove item" + errormsg);
             }
         }
@@ -588,6 +605,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("getTrashItem", "addingError", "could get records");
             }
         }
@@ -614,6 +632,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("deleteTrashItem", "removingError", "could not remove exist");
             }
         }
@@ -637,6 +656,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("addRespPerson", "addingError", "could not add record");
             }
         }
@@ -677,6 +697,7 @@ namespace Meditrash4_Midpoint
             }
             catch (Exception ex)
             {
+                Logger.LogE(ex);
                 return genIncorrectResponse("exportTrashByCathegory", "addingError", "could not add record");
             }
         }
