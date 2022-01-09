@@ -117,18 +117,37 @@ namespace Meditrash4_Midpoint
             resultReader.Close();
             return returnVals;
         }
-        public void setObjectParam<T>(T _object, string collum, string value) where T : MysqlReadable
+        public void setObjectParam<T>(T _object, string collum, MySqlDbType type, object value) where T : MysqlReadable
         {
+            Exception e = null;
             List<DbVariable> vallist = _object.getObjectData();
             List<int> pkList = _object.getPrimaryIndex();
-            string cond = "";
-            foreach(int obj in _object.getPrimaryIndex())
+
+            MySqlCommand cmd = new MySqlCommand("", conn);
+            string cond = genKeySelectCond(_object, cmd);
+
+            Monitor.Enter(connLock);
+
+            try
             {
-                cond += vallist[obj].name+ " '" + MySqlHelper.EscapeString(vallist[obj].value.ToString()) + "' AND";
+                cmd.CommandText = "UPDATE " + _object.getMyName() + " SET " + collum + "=@" + collum + "_edit " + " WHERE " + cond + ";";
+                fillSelectCommandParamQ(ref cmd, _object);
+                cmd.Parameters.Add("@" + collum + "_edit", type).Value = value;
+                int execution = cmd.ExecuteNonQuery();
             }
-            value = MySqlHelper.EscapeString(value);
-            MySqlCommand cmd = new MySqlCommand("UPDATE " + _object.getMyName() +  " SET " + collum + "='" +value+"'"+ " where " , conn);
-            int execution = cmd.ExecuteNonQuery();
+            catch (Exception ex)
+            {
+                e = ex;
+            }
+            finally
+            {
+                Monitor.Exit(connLock);
+            }
+
+            if (e != null)
+            {
+                throw e;
+            }
         }
         
         public static string genSelectCommandParamQ<T>(T _object) where T : MysqlReadable
@@ -254,6 +273,47 @@ namespace Meditrash4_Midpoint
                 throw e;
             }
             return new List<T>();
+        }
+        public static string genKeySelectCond<T>(T _object, MySqlCommand cmd) where T : MysqlReadable
+        {
+            string cond = "";
+            List<DbVariable> vallist = _object.getObjectData();
+            int k = 0;
+            foreach (int obj in _object.getPrimaryIndex())
+            {
+                cond += vallist[obj].name + " = @cond" + k + " AND ";
+                cmd.Parameters.Add("@cond"+k, vallist[obj].type).Value = vallist[obj].value;
+                k++;
+            
+            }
+            cond = cond.Remove(cond.Length - 4);
+            return cond;
+        }
+        internal void removeObject<T>(T _object) where T : MysqlReadable
+        {
+            Exception e = null;
+            MySqlCommand cmd = new MySqlCommand("", conn);
+            string cond = genKeySelectCond(_object,cmd);
+            Monitor.Enter(connLock);
+            try
+            {
+                cmd.CommandText = "DELETE FROM " + _object.getMyName() + " WHERE "+ cond + ";";
+                fillSelectCommandParamQ(ref cmd, _object);
+                int execution = cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+            }
+            finally
+            {
+                Monitor.Exit(connLock);
+            }
+
+            if (e != null)
+            {
+                throw e;
+            }
         }
         public void reset()
         {
@@ -477,47 +537,6 @@ values(254751000,2,'root','ROOT','admin',unhex(SHA2('root',256)),null);", conn);
             cmd = new MySqlCommand("insert into TrashCathegody\nvalues(180208,'Jiná nepoužitelná léčiva neuvedená pod číslem 18 02 07');", conn);
             cmd.ExecuteNonQuery();
             */
-        }
-        public static string genKeySelectCond<T>(T _object, MySqlCommand cmd) where T : MysqlReadable
-        {
-            string cond = "";
-            List<DbVariable> vallist = _object.getObjectData();
-            int k = 0;
-            foreach (int obj in _object.getPrimaryIndex())
-            {
-                cond += vallist[obj].name + " = @cond" + k + " AND ";
-                cmd.Parameters.Add("@cond"+k, vallist[obj].type).Value = vallist[obj].value;
-                k++;
-            
-            }
-            cond = cond.Remove(cond.Length - 4);
-            return cond;
-        }
-        internal void removeObject<T>(T _object) where T : MysqlReadable
-        {
-            Exception e = null;
-            MySqlCommand cmd = new MySqlCommand("", conn);
-            string cond = genKeySelectCond(_object,cmd);
-            Monitor.Enter(connLock);
-            try
-            {
-                cmd.CommandText = "DELETE FROM " + _object.getMyName() + " WHERE "+ cond + ";";
-                fillSelectCommandParamQ(ref cmd, _object);
-                int execution = cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                e = ex;
-            }
-            finally
-            {
-                Monitor.Exit(connLock);
-            }
-
-            if (e != null)
-            {
-                throw e;
-            }
         }
     }
     

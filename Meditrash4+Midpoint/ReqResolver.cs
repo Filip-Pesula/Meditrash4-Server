@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -49,6 +50,30 @@ namespace Meditrash4_Midpoint
 
                 XElement rootRes = new XElement("requestCommand");
                 rootRes.SetAttributeValue("name", "addUser");
+
+                return new XElement("Request", rootRes);
+            }
+            catch (Exception ex)
+            {
+                return genIncorrectResponse("addUser", "addingError", "could not add user");
+            }
+        }
+        public static XElement editPassword(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
+        {
+            try
+            {
+
+                mySqlHandle.setObjectParam<User>(
+                    opUser, 
+                    "passwd", 
+                    MySqlDbType.Binary, 
+                    SHA256.HashData(
+                        Encoding.UTF8.GetBytes(
+                            requestCommand.Element("password").Value)
+                        )
+                    );
+                XElement rootRes = new XElement("requestCommand");
+                rootRes.SetAttributeValue("name", "editPassword");
 
                 return new XElement("Request", rootRes);
             }

@@ -190,6 +190,9 @@ namespace Meditrash4_Midpoint
                 case "addUser":
                     return ReqResolver.addUser(requestCommand,opUser,mySqlHandle);
                     break;
+                case "editPassword":
+                    return ReqResolver.editPassword(requestCommand, opUser, mySqlHandle);
+                    break;
                 case "addDepartment":
                     return ReqResolver.addDepartment(requestCommand, opUser, mySqlHandle);
                     break;
