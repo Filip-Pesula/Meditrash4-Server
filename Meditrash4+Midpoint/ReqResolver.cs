@@ -480,7 +480,12 @@ namespace Meditrash4_Midpoint
                                         new(MySqlDbType.Int64,respPersonIco))}
                 );
                 if (respPerson1.Count == 0)
+                {
                     throw new Exception("Resp person does not exist");
+                }
+                ExportRecords exportRecords = new ExportRecords(respPerson1[0].ico);
+                mySqlHandle.saveObject(exportRecords);
+                exportRecords = mySqlHandle.GetObjectList<ExportRecords>("uid = (SELECT MAX(uid) FROM exportrecords)", new())[0];
                 requestCommand.Elements("cathegory").ToList().ForEach(cathegory =>
                 {
                     int intVal = int.Parse(cathegory.Element("id").Value);
@@ -492,13 +497,15 @@ namespace Meditrash4_Midpoint
                                         new(MySqlDbType.Int32,intVal))});
                     if (cathegory1.Count == 0)
                         return;
-                    ExportRecords exportRecords = new ExportRecords(respPerson1[0].ico);
-                    mySqlHandle.saveObject(exportRecords);
-                    //mySqlHandle.querry("U");
+                    
+                    mySqlHandle.querry(
+                        @"update records
+                        SET DeStoreRecords_uid = (SELECT uid FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords)) where uid in (select * from (select R.uid  from odpad  LEFT join records R on odpad.uid = R.Odpad_uid where TrashCathegody_id = 180101 AND DeStoreRecords_uid = null ) AS X);"
+                        ,new());
                 });
 
                 XElement rootRes = new XElement("requestCommand");
-                rootRes.SetAttributeValue("name", "addRespPerson");
+                rootRes.SetAttributeValue("name", "exportTrashByCathegory");
                 return new XElement("Request", rootRes);
             }
             catch (Exception ex)

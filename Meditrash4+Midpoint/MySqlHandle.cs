@@ -485,8 +485,9 @@ values(254751000,2,'root','ROOT','admin',unhex(SHA2('root',256)),null);", conn);
             int k = 0;
             foreach (int obj in _object.getPrimaryIndex())
             {
-                cond += vallist[obj].name + " = @" + "cond" + k + " AND";
-                cmd.Parameters.Add('@' + "cond"+k, vallist[obj].type).Value = vallist[obj].value;
+                cond += vallist[obj].name + " = @cond" + k + " AND ";
+                cmd.Parameters.Add("@cond"+k, vallist[obj].type).Value = vallist[obj].value;
+                k++;
             
             }
             cond = cond.Remove(cond.Length - 4);

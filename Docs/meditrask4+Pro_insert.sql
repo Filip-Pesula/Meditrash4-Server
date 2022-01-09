@@ -1,5 +1,4 @@
-select * from user where name = BINARY 'root';
-insert into odpad(name,TrashCathegory_id,weight_g)
+insert into odpad(name,TrashCathegody_id,weight_g)
 values
 ('jehla kratka',180101,10),
 ('jehla dlouha',180101,20),
@@ -81,3 +80,13 @@ values
 (2021-03-01,'1', '1' , '0106065355', 'Liberec',null),
 (2021-03-01,'1', '3' , '0106065355', 'Liberec',null);
 
+insert into exportrecords(exportDate,RespPerson_ico)
+values
+(2020-03-05,'52174116'),
+(2020-03-05,'58015296'),
+(2020-03-05,'10844595');
+
+SELECT * FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords);
+
+update records
+SET DeStoreRecords_uid = 1;

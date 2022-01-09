@@ -45,8 +45,8 @@ namespace Meditrash4_Midpoint.mysqlTables
         public List<DbVariable> getObjectData()
         {
             List<DbVariable> a = new List<DbVariable>();
-            a.Add(new DbVariable("User_rodCislo", MySqlDbType.Int32, user_rod_c));
-            a.Add(new DbVariable("Odpad_uid", MySqlDbType.String, odpad_uid));
+            a.Add(new DbVariable("User_rodCislo", MySqlDbType.Int64, user_rod_c));
+            a.Add(new DbVariable("Odpad_uid", MySqlDbType.Int32, odpad_uid));
             return a;
         }
 
