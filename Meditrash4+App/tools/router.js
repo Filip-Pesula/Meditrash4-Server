@@ -68,6 +68,8 @@ class Router {
             })
         })
 
+
+
         this.#ipcInstance.handle('go_to_statistics_page', async (event, arg) => {
             return new Promise((resolve, reject) => {
                 if (this.#dataStore.getSharedDataObj().user.token != 0) {
@@ -92,6 +94,16 @@ class Router {
             return new Promise((resolve, reject) => {
                 if (this.#dataStore.getSharedDataObj().user.token != 0) {
                     this.#window.loadFile(path.join(__dirname, '../views', 'profile.html'));
+                    resolve(true);
+                }
+                reject(new OperationNotPermitted('User\'s rights level is insufficient'));
+            })
+        })
+
+        this.#ipcInstance.handle('go_to_add_user_page', async (event, arg) => {
+            return new Promise((resolve, reject) => {
+                if (this.#dataStore.getSharedDataObj().user.token != 0) {
+                    this.#window.loadFile(path.join(__dirname, '../views', 'add_user.html'));
                     resolve(true);
                 }
                 reject(new OperationNotPermitted('User\'s rights level is insufficient'));

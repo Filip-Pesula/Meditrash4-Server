@@ -242,11 +242,6 @@ namespace Meditrash4_Midpoint
                 case "getTrashItem":
                     return ReqResolver.getTrashItem(requestCommand, opUser, mySqlHandle);
                     break;
-                //TODO
-                case "deleteTrashItem":
-                    return ReqResolver.deleteTrashItem(requestCommand, opUser, mySqlHandle);
-                    break;
-                //only extention
                 case "addRespPerson":
                     return ReqResolver.addRespPerson(requestCommand, opUser, mySqlHandle);
                     break;

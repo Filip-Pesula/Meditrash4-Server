@@ -21,24 +21,50 @@
             }
         }
 
-        async function addNewThrashRecord() {
+        async function addNewUser() {
             try {
-                const count = document.getElementById('quantity').value;
+                const jsmeno = document.getElementById('jsmeno').value;
+                const rodCislo = document.getElementById('rodCislo').value;
+                const fisrtName = document.getElementById('fisrtName').value;
+                const lastName = document.getElementById('lastName').value;
+                const password = document.getElementById('password').value;
 
-                if (count == 0)  {
-                    displayBanner('warning', 'Množství musí být větší než 0');
+
+                if (rodCislo == 0)  {
+                    displayBanner('warning', 'rodCislo musí být větší než 0');
+                    return;
+                }
+                if (jsmeno == '')  {
+                    displayBanner('warning', 'jsmeno musí obsahovat text');
+                    return;
+                }
+                if (fisrtName == '')  {
+                    displayBanner('warning', 'fisrtName musí obsahovat text');
+                    return;
+                }
+                if (lastName == '')  {
+                    displayBanner('warning', 'lastName musí obsahovat text');
+                    return;
+                }
+                if (password == '')  {
+                    displayBanner('warning', 'password musí obsahovat text');
                     return;
                 }
 
-                await window.serverRequests.addNewThrashRecord({
-                    id: document.getElementById('itemSelect').value,
-                    count
+                await window.serverRequests.addNewUser({
+                    department: department, 
+                    jsmeno: jsmeno,
+                    rodCislo: rodCislo,
+                    rights: rights,
+                    fisrtName: fisrtName,
+                    lastName: lastName,
+                    password: password
                 })
 
-                displayBanner('info', 'Záznam byl přidán')
+                displayBanner('info', 'Uživatele byl přidán')
 
             } catch (error) {
-                displayBanner('danger', 'Záznam se nepodařilo přidat')
+                displayBanner('danger', 'Uživatele se nepodařilo přidat')
             }
         }
 
@@ -100,25 +126,37 @@
             <div class="card-body">
                 <h4 class="card-title mb-3">Vložení záznamu</h4>
                 <div class="mb-3 row">
-                    <label for="item" class="col-sm-4 col-form-label">Vyberte položku</label>
+                    <label for="jsmeno" class="col-sm-4 col-form-label">Uživatelské jméno</label>
                     <div class="col-sm-8">
-                        <select id="itemSelect" class="form-select" aria-label="Vyberte položku">
-                        </select>
+                        <input type="text" class="form-control" id="jsmeno" value="">
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label for="quantity" class="col-sm-4 col-form-label">Množství</label>
-                    <div class="col-sm-5">
-                        <input type="number" class="form-control" id="quantity" value="0">
+                    <label for="rodCislo" class="col-sm-4 col-form-label">Rodné číslo</label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control" id="rodCislo" value="">
                     </div>
-                    <div class="col-sm-3">
-                        <select class="form-select" aria-label="Default select example">
-                            <option value="g">g</option>
-                        </select>
+                </div>
+                <div class="mb-3 row">
+                    <label for="fisrtName" class="col-sm-4 col-form-label">Křestní jméno</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="fisrtName" value="">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="lastName" class="col-sm-4 col-form-label">Příjmení</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="lastName" value="">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="password" class="col-sm-4 col-form-label">Heslo</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="password" value="">
                     </div>
                 </div>
                 <div class="col-12">
-                    <button type="button" class="btn btn-primary" onclick="addNewThrashRecord()">Vložit záznam</button>
+                    <button type="button" class="btn btn-primary" onclick="addNewUser()">Vložit záznam</button>
                 </div>
             </div>
         </div>

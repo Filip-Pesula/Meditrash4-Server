@@ -534,7 +534,7 @@ namespace Meditrash4_Midpoint
                         }
                         catch (Exception e)
                         {
-                            errormsg += "addError: " + record[0].uid + '\n';
+                            errormsg += "addError: " + x.uid + '\n';
                         }
                     });
                 });
@@ -610,32 +610,6 @@ namespace Meditrash4_Midpoint
             }
         }
         //TODO need check
-        public static XElement deleteTrashItem(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
-        {
-            try
-            {
-                int trashId = int.Parse(requestCommand.Element("id").Value);
-                List<Records> records = mySqlHandle.GetObjectList<Records>(
-                    "uid = @uid",
-                    new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
-                            { new(
-                                            "@uid",
-                                            new(MySqlDbType.Int32,trashId))});
-                if (records.Count == 0)
-                {
-                    return genIncorrectResponse("deleteTrashItem", "removingError", "item does not exist");
-                }
-                mySqlHandle.removeObject(records[0]);
-                XElement rootRes = new XElement("requestCommand");
-                rootRes.SetAttributeValue("name", "deleteTrashItem");
-                return new XElement("Request",rootRes);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogE(ex);
-                return genIncorrectResponse("deleteTrashItem", "removingError", "could not remove exist");
-            }
-        }
         public static XElement addRespPerson(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
         {
             try
@@ -660,7 +634,44 @@ namespace Meditrash4_Midpoint
                 return genIncorrectResponse("addRespPerson", "addingError", "could not add record");
             }
         }
-        //TODO need reshape
+        public static XElement removeRespPerson(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
+        {
+            string errormsg = "";
+            try
+            {
+                requestCommand.Elements("ico").ToList().ForEach(x =>
+                {
+                    int recordId = int.Parse(x.Value);
+                    List<RespPerson> respPerson = mySqlHandle.GetObjectList<RespPerson>(
+                        "uid = @uid",
+                        new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
+                            { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
+                                            "uid",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,recordId))});
+                    respPerson.ForEach(x =>
+                    {
+                        try
+                        {
+                            mySqlHandle.removeObject(x);
+                        }
+                        catch (Exception e)
+                        {
+                            errormsg += "addError: " + x.ico + '\n';
+                        }
+                    });
+                });
+                XElement rootRes = new XElement("requestCommand");
+                rootRes.SetAttributeValue("name", "removeRespPerson");
+                return new XElement("Request",
+                    rootRes,
+                    new XElement("Message", "items were removed" + errormsg));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogE(ex);
+                return genIncorrectResponse("removeRespPerson", "addingError", "could not remove item" + errormsg);
+            }
+        }
         public static XElement exportTrashByCathegory(XElement requestCommand, User opUser, MySqlHandle mySqlHandle)
         {
             try

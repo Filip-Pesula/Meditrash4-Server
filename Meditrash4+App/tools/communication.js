@@ -154,6 +154,26 @@ class RequestAssembler {
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
+    static createAddUserRequest(token, department ,jsmeno,rodCislo,fisrtName,lastName,password, rights) {
+        const object_structure = {
+            Request: {
+                uniqueToken: { '#text': token },
+                requestCommand: {
+                    '@name': 'addUser',
+                    department: { '#text': department },
+                    name: { '#text': jsmeno },
+                    password: { '#text': password },
+                    rodCislo: { '#text': rodCislo },
+                    rights: { '#text': rights },
+                    firstName: { '#text': fisrtName },
+                    lastName: { '#text': lastName },
+                },
+            }
+        };
+
+        return xmlbuilder.create(object_structure).end({ pretty: true });
+    }
+
     static createThreshRecordsRequest(token, startDate, endDate, category) {
         let root = xmlbuilder.create('Request');
 
