@@ -7,7 +7,9 @@ contextBridge.exposeInMainWorld('serverRequests', {
     addNewThrashRecord: (data) => ipcRenderer.invoke('thrash_item', data),
     removeFavItems: (data) => ipcRenderer.invoke('remove_fav_item', data),
     addNewFavItems: (data) => ipcRenderer.invoke('add_fav_item', data),
-    editPassword: (data) => ipcRenderer.invoke('edit_password', data)
+    editPassword: (data) => ipcRenderer.invoke('edit_password', data), 
+    getRecords: (data) => ipcRenderer.invoke('get_records', data),
+    getCathegories: () => ipcRenderer.invoke('get_cathegories')
 })
 
 contextBridge.exposeInMainWorld('localData', {

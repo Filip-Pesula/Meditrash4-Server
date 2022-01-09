@@ -54,7 +54,7 @@ class RequestAssembler {
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
-    static createCathegoryAdditionRequest() {
+    static createcategoryAdditionRequest() {
 
     }
 
@@ -70,7 +70,7 @@ class RequestAssembler {
                 .ele('trash')
                 .ele('id', item.id).up()
                 .ele('name', item.name).up()
-                .ele('cathegory', item.cathegory).up()
+                .ele('category', item.category).up()
                 .ele('weight', item.weight).up()
         }
 
@@ -81,10 +81,10 @@ class RequestAssembler {
         const object_structure = {
             Request: {
                 uniqueToken: { '#text': token },
-                requestCommand: {'@name': 'getItems'}
+                requestCommand: { '@name': 'getItems' }
             }
         };
-        
+
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
@@ -132,10 +132,10 @@ class RequestAssembler {
         const object_structure = {
             Request: {
                 uniqueToken: { '#text': token },
-                requestCommand: {'@name': 'getFavList'}
+                requestCommand: { '@name': 'getFavList' }
             }
         };
-        
+
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
@@ -154,15 +154,45 @@ class RequestAssembler {
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
+    static createThreshRecordsRequest(token, startDate, endDate, category) {
+        let root = xmlbuilder.create('Request');
+
+        root.ele('uniqueToken', token);
+
+        let requestCommand = root.ele('requestCommand', { name: 'getTrashItem' });
+
+        console.log(startDate);
+        console.log(endDate);
+
+        requestCommand.ele('catheory', category);
+        requestCommand.ele('yearStart', startDate.getFullYear());
+        requestCommand.ele('monthStart', startDate.getMonth() + 1);
+        requestCommand.ele('dayStart', startDate.getDate());
+        requestCommand.ele('yearEnd', endDate.getFullYear());
+        requestCommand.ele('monthEnd', endDate.getMonth() + 1);
+        requestCommand.ele('dayEnd', endDate.getDate());
+
+        return root.end({ pretty: true });
+    }
+
+    static createCathegoriesListRequest(token) {
+        let root = xmlbuilder.create('Request');
+
+        root.ele('uniqueToken', token);
+        root.ele('requestCommand', { name: 'getCathegories' });
+
+        return root.end({ pretty: true });
+    }
+
     static createRespPersonAdditionRequest() { }
 
-    static createExportByCathegoryRequest() { }
+    static createExportBycategoryRequest() { }
 }
 
 class ResponseParser {
 
     static async parseResponse(response) {
-        const dataObject = await xml2js.parseStringPromise(response.toString())
+        const dataObject = await xml2js.parseStringPromise(response.toString());
         const rootElementName = Object.keys(dataObject)[0];
 
         if (rootElementName === 'Login') {
@@ -174,8 +204,25 @@ class ResponseParser {
         switch (responseType) {
             case 'getFavList': return this.parseFavListAcquiringResponse(response);
             case 'getItems': return this.parseItemsAcquiringResponse(response);
+            case 'getTrashItem': return this.parseThreshRecordsResponse(response);
+            case 'getCathegories': return this.parseCathegoriesListResponse(response);
+            case 'editPassword', 'trashItem': return true;
+
         }
     }
+
+    static async parseCathegoriesListResponse(response) {
+        const dataObject = await xml2js.parseStringPromise(response.toString());
+        let categories = [];
+
+        if (dataObject.Request.requestCommand[0].cathegory === undefined) return null;
+
+        for (const category of dataObject.Request.requestCommand[0].cathegory) {
+            categories.push(category.$);
+        }
+
+        return categories;
+    } 
 
     static async parseLoginResponse(response) {
         const dataObject = await xml2js.parseStringPromise(response.toString())
@@ -194,7 +241,7 @@ class ResponseParser {
             rights: dataObject.Login.rights[0]
         };
     }
-
+    
     static async parseFavListAcquiringResponse(response) {
         const dataObject = await xml2js.parseStringPromise(response.toString());
         let favItems = [];
@@ -208,6 +255,15 @@ class ResponseParser {
         return favItems;
     }
 
+    static async parseThreshRecordsResponse(response) {
+        const dataObject = await xml2js.parseStringPromise(response.toString());
+        let records = [];
+
+        console.log(dataObject)
+
+        return records;
+    }
+
     static async parseItemsAcquiringResponse(response) {
         const dataObject = await xml2js.parseStringPromise(response.toString());
         let items = [];
@@ -215,7 +271,7 @@ class ResponseParser {
         for (const item of dataObject.Request.requestCommand[0].item) {
             items.push(item.$);
         }
-        
+
         return items;
     }
 }
