@@ -680,13 +680,13 @@ namespace Meditrash4_Midpoint
                 }
                 ExportRecords exportRecords = new ExportRecords(respPerson1[0].ico);
                 mySqlHandle.saveObject(exportRecords);
-                exportRecords = mySqlHandle.GetObjectList<ExportRecords>("uid = (SELECT MAX(uid) FROM exportrecords)", new())[0];
+                exportRecords = mySqlHandle.GetObjectList<ExportRecords>("uid = (SELECT MAX(uid) FROM ExportRecords)", new())[0];
                 requestCommand.Elements("cathegory").ToList().ForEach(cathegory =>
                 {
                     int intVal = int.Parse(cathegory.Element("id").Value);
                     mySqlHandle.querry(
                         @"update records
-                        SET DeStoreRecords_uid = (SELECT uid FROM exportrecords WHERE uid=(SELECT MAX(uid) FROM exportrecords)) where uid in (select * from (select R.uid  from odpad  LEFT join records R on odpad.uid = R.Odpad_uid where TrashCathegody_id = @cathegory AND DeStoreRecords_uid = null ) AS X);"
+                        SET DeStoreRecords_uid = (SELECT uid FROM ExportRecords WHERE uid=(SELECT MAX(uid) FROM ExportRecords)) where uid in (select * from (select R.uid  from Odpad  LEFT join Records R on Odpad.uid = R.Odpad_uid where TrashCathegody_id = @cathegory AND DeStoreRecords_uid = null ) AS X);"
                         ,
                         new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>> { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>("@cathegory", new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32, intVal)) });
                 });
