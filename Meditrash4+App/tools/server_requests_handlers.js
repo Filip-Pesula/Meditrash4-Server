@@ -98,6 +98,11 @@ module.exports = class RequestsHandler {
             return this.writeData(data);
         });
 
+        this.#ipcInstance.handle('edit_password', async (event, arg) => {
+            const data = RequestAssembler.createPasswordEditRequest(this.#dataStore.getSharedDataObj().user.token, arg.password);
+            return this.writeData(data);
+        });
+
         this.#ipcInstance.handle('get_fav_list', async (event, arg) => {
             const data = RequestAssembler.createFavListAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
             this.#dataStore.getSharedDataObj().user.favItems = await this.writeData(data);

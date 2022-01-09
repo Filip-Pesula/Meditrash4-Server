@@ -14,6 +14,9 @@
             await window.serverRequests.getUserFavItems();
             userData = await window.localData.getLoadedUserData();
 
+            document.getElementById('inputPassword').disabled = true;
+            document.getElementById('inputPassword').readonly = true;
+
             document.getElementById('personalNumber').value = userData.personalNumber;
             document.getElementById('username').value = userData.username;
             document.getElementById('inputPassword').value = 'placeholder';
@@ -88,11 +91,98 @@
             await window.serverRequests.removeFavItems({ items: toBeRemoved })
             window.router.goToProfilePage();
         }
+
+        async function showPasswordChange() {
+            const html =
+            `
+            <div id="passwordChangeView">
+            <div class="mb-3 row">
+                    <label id="passwordLabel" for="inputPassword" class="col-sm-4 col-form-label">Nové Heslo</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input id="inputPassword" type="password" class="form-control"
+                                    aria-describedby="changePassword">
+                                <button id="passwordChangeButton" class="btn btn-outline-danger" type="button"
+                                    id="changePassword" onclick="hidePasswordChange()">Zrusit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="inputPasswordCheckRow" class="mb-3 row">
+                        <label for="inputPasswordCheck" class="col-sm-4 col-form-label">Opakujte heslo</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input id="inputPasswordCheck" type="password" class="form-control"
+                                    aria-describedby="inputPasswordChange">
+                                <button class="btn btn-outline-success" type="button" id="inputPasswordChange"
+                                    onclick="changePassword()">Změnit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('passwordView').insertAdjacentHTML('afterEnd', html);
+            document.getElementById('passwordView').remove();
+        }
+
+        async function hidePasswordChange() {
+            const html =
+            `
+                <div id="passwordView" class="mb-3 row">
+                        <label id="passwordLabel" for="inputPassword" class="col-sm-4 col-form-label">Heslo</label>
+                        <div class="col-sm-8">
+                            <div class="input-group">
+                                <input id="inputPassword" type="password" class="form-control"
+                                    aria-describedby="changePassword">
+                                <button id="passwordChangeButton" class="btn btn-outline-primary" type="button"
+                                    id="changePassword" onclick="showPasswordChange()">Upravit</button>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            `;
+
+            document.getElementById('passwordChangeView').insertAdjacentHTML('afterEnd', html);
+            document.getElementById('passwordChangeView').remove();
+        }
+
+        async function changePassword() {
+            const newPassword = document.getElementById('inputPassword').value;
+            const newPasswordCheck = document.getElementById('inputPasswordCheck').value;
+
+            if (newPassword.length < 5 || newPasswordCheck < 5) {
+                displayErrorBanner("warning", "Heslo musí mít alespoň 5 znaků");
+            }
+
+            if (newPassword === newPasswordCheck) {
+                try {
+                    const result = await window.serverRequests.editPassword(newPassword);
+                } catch (error) {
+                    displayErrorBanner("danger", error.message);
+                }
+            } else {
+                displayErrorBanner("warning", "Hesla se neshodují");
+            }
+        }
+
+        function displayErrorBanner(type, message) {
+            const html = 
+            `<div id="errorBanner" class="row align-items-center mb-3"><div class="col"></div>
+            <div class="alert alert-${type} shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5 mt-3" role="alert">${message}</div>
+            <div class="col"></div></div>`;
+
+            document.getElementById('mainCard').insertAdjacentHTML('beforeBegin', html);
+
+            setTimeout(() => {
+                document.getElementById('errorBanner').remove()
+            }, 5000);
+        }
+
     </script>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow mb-4">
         <div class="container-fluid">
             <a class="navbar-brand">MediTrash4+</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -121,9 +211,9 @@
             </div>
         </div>
     </nav>
-    <div class="row align-items-center">
+    <div  id="mainCard"class="row align-items-center">
         <div class="col"></div>
-        <div class="card p-0 shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5 mt-5">
+        <div class="card p-0 shadow col-12 col-sm-12 col-md-9 col-lg-7 col-xl-5">
             <div class="card-header">
                 <h3 class="m-0">Profil</h3>
             </div>
@@ -144,25 +234,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mb-3 row">
-                        <label for="inputPassword" class="col-sm-4 col-form-label">Heslo</label>
+                    <div id="passwordView" class="mb-3 row">
+                        <label id="passwordLabel" for="inputPassword" class="col-sm-4 col-form-label">Heslo</label>
                         <div class="col-sm-8">
                             <div class="input-group">
-                                <input id="inputPassword" type="password" class="form-control" disabled readonly
+                                <input id="inputPassword" type="password" class="form-control"
                                     aria-describedby="changePassword">
-                                <button class="btn btn-outline-primary" type="button"
-                                    id="changePassword">Upravit</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3 row invisible">
-                        <label for="inputPasswordCheck" class="col-sm-4 col-form-label">Opakujte heslo</label>
-                        <div class="col-sm-8">
-                            <div class="input-group">
-                                <input id="inputPasswordCheck" type="password" class="form-control"
-                                    aria-describedby="inputPasswordChange">
-                                <button class="btn btn-outline-danger" type="button"
-                                    id="inputPasswordChange">Změnit</button>
+                                <button id="passwordChangeButton" class="btn btn-outline-primary" type="button"
+                                    id="changePassword" onclick="showPasswordChange()">Upravit</button>
                             </div>
                         </div>
                     </div>
@@ -207,13 +286,6 @@
                     <input class="btn btn-primary" type="button" value="Uložit změny" onclick="updateFavItems()">
                 </li>
             </ul>
-        </div>
-        <div class="col"></div>
-    </div>
-    <div class="row align-items-center">
-        <div class="col"></div>
-        <div id="error_alert"
-            class="alert alert-danger shadow invisible col-12 col-sm-12 col-md-7 col-lg-5 col-xl-4 mt-3" role="alert">
         </div>
         <div class="col"></div>
     </div>

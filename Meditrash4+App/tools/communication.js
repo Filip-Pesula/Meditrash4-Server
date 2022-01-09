@@ -116,6 +116,18 @@ class RequestAssembler {
         return root.end({ pretty: true });
     }
 
+    static createPasswordEditRequest(token, password) {
+        let root = xmlbuilder.create('Request');
+
+        root.ele('uniqueToken', token);
+
+        let requestCommand = root.ele('requestCommand', { name: 'editPassword' });
+
+        requestCommand.ele('password', password)
+
+        return root.end({ pretty: true });
+    }
+
     static createFavListAcquiringRequest(token) {
         const object_structure = {
             Request: {
