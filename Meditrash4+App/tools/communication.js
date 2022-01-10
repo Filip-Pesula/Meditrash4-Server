@@ -36,7 +36,6 @@ class RequestAssembler {
                 }
             }
         };
-
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
@@ -82,6 +81,17 @@ class RequestAssembler {
             Request: {
                 uniqueToken: { '#text': token },
                 requestCommand: { '@name': 'getItems' }
+            }
+        };
+
+        return xmlbuilder.create(object_structure).end({ pretty: true });
+    }
+
+    static createDepartmentAcquiringRequest(token) {
+        const object_structure = {
+            Request: {
+                uniqueToken: { '#text': token },
+                requestCommand: { '@name': 'getDepartments' }
             }
         };
 
@@ -169,18 +179,18 @@ class RequestAssembler {
         return xmlbuilder.create(object_structure).end({ pretty: true });
     }
 
-    static createAddUserRequest(token, department ,jsmeno,rodCislo,fisrtName,lastName,password, rights) {
+    static createAddUserRequest(token, department , name, rodCislo,firstName,lastName,password, rights) {
         const object_structure = {
             Request: {
                 uniqueToken: { '#text': token },
                 requestCommand: {
                     '@name': 'addUser',
                     department: { '#text': department },
-                    name: { '#text': jsmeno },
+                    name: { '#text': name },
                     password: { '#text': password },
                     rodCislo: { '#text': rodCislo },
                     rights: { '#text': rights },
-                    firstName: { '#text': fisrtName },
+                    firstName: { '#text': firstName },
                     lastName: { '#text': lastName },
                 },
             }
@@ -236,8 +246,10 @@ class ResponseParser {
         switch (responseType) {
             case 'getFavList': return this.parseFavListAcquiringResponse(response);
             case 'getItems': return this.parseItemsAcquiringResponse(response);
+            case 'getDepartments': return this.parseDepartmentsAcquiringResponse(response);
             case 'getTrashItem': return this.parseThreshRecordsResponse(response);
             case 'getCathegories': return this.parseCathegoriesListResponse(response);
+            case 'addUser': return this.parseAddUserResponse(response);
             case 'editPassword', 'trashItem': return true;
 
         }
@@ -300,6 +312,14 @@ class ResponseParser {
         return records;
     }
 
+    static async parseAddUserResponse(response) {
+        const dataObject = await xml2js.parseStringPromise(response.toString());
+        if(Object.keys(dataObject).includes('RequestError')){
+            throw new Error("");
+        }
+        return true;
+    }
+
     static async parseItemsAcquiringResponse(response) {
         const dataObject = await xml2js.parseStringPromise(response.toString());
         let items = [];
@@ -309,6 +329,17 @@ class ResponseParser {
         }
 
         return items;
+    }
+
+    static async parseDepartmentsAcquiringResponse(response) {
+        const dataObject = await xml2js.parseStringPromise(response.toString());
+        let departments = [];
+
+        for (const item of dataObject.Request.requestCommand[0].department) {
+            departments.push(item.$);
+        }
+
+        return departments;
     }
 }
 

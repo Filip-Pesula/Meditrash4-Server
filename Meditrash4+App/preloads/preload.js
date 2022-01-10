@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('serverRequests', {
     evaluateFormData: (data) => ipcRenderer.invoke('evaluate_login_data', data),
     getUserFavItems: () => ipcRenderer.invoke('get_fav_list'),
     getAllItems: () => ipcRenderer.invoke('get_items'),
+    getAllDepartments: () => ipcRenderer.invoke('get_departments'),
     addNewThrashRecord: (data) => ipcRenderer.invoke('thrash_item', data),
     addNewUser: (data) => ipcRenderer.invoke('add_user', data),
     removeFavItems: (data) => ipcRenderer.invoke('remove_fav_item', data),

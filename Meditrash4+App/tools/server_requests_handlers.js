@@ -61,10 +61,9 @@ module.exports = class RequestsHandler {
 
         this.#ipcInstance.handle('add_user', async (event, arg) => {
             const data = RequestAssembler.createUserAdditionRequest(
-                arg.token, arg.department, arg.name, arg.password,
+                this.#dataStore.getSharedDataObj().user.token, arg.department, arg.name, arg.password,
                 arg.rodCislo, arg.rights, arg.firstName, arg.lastName
             );
-
             return this.writeData(data);
         });
 
@@ -83,8 +82,15 @@ module.exports = class RequestsHandler {
             return this.writeData(data);
         });
 
+        
+
         this.#ipcInstance.handle('get_items', async (event, arg) => {
             const data = RequestAssembler.createItemsAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
+            return this.writeData(data);
+        });
+
+        this.#ipcInstance.handle('get_departments', async (event, arg) => {
+            const data = RequestAssembler.createDepartmentAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
             return this.writeData(data);
         });
 
@@ -95,11 +101,6 @@ module.exports = class RequestsHandler {
 
         this.#ipcInstance.handle('remove_fav_item', async (event, arg) => {
             const data = RequestAssembler.createFavItemRemovalRequest(this.#dataStore.getSharedDataObj().user.token, arg.items);
-            return this.writeData(data);
-        });
-
-        this.#ipcInstance.handle('remove_record', async (event, arg) => {
-            const data = RequestAssembler.createRecordRemovalRequest(this.#dataStore.getSharedDataObj().user.token, arg.records);
             return this.writeData(data);
         });
 
@@ -123,6 +124,11 @@ module.exports = class RequestsHandler {
             const data = RequestAssembler.createFavListAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
             this.#dataStore.getSharedDataObj().user.favItems = await this.writeData(data);
             return this.#dataStore.getSharedDataObj().user.favItems;
+        });
+
+        this.#ipcInstance.handle('remove_record', async (event, arg) => {
+            const data = RequestAssembler.createRecordRemovalRequest(this.#dataStore.getSharedDataObj().user.token, arg.records);
+            return this.writeData(data);
         });
 
         this.#ipcInstance.handle('thrash_item', async (event, arg) => {
