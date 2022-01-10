@@ -64,6 +64,7 @@ namespace Meditrash4_Midpoint.mysqlTables
         public List<DbVariable> getObjectData()
         {
             List<DbVariable> a = new List<DbVariable>();
+            a.Add(new DbVariable("uid", MySqlDbType.Int32, uid));
             a.Add(new DbVariable("storageDate", MySqlDbType.DateTime, date));
             a.Add(new DbVariable("amount", MySqlDbType.Int32, amount));
             a.Add(new DbVariable("Odpad_uid", MySqlDbType.Int32, Odpad_uid));
@@ -85,7 +86,7 @@ namespace Meditrash4_Midpoint.mysqlTables
                 date = (DateTime)data[1];
                 amount = (int)data[2];
                 Odpad_uid = (int)data[3];
-                User_rodCislo = (int)data[4];
+                User_rodCislo = (long)data[4];
                 DeStoreRecords_uid = (int?)data[5];
             }
             catch (Exception e)

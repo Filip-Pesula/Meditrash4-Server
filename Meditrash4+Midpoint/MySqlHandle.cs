@@ -94,6 +94,7 @@ namespace Meditrash4_Midpoint
 
         public List<List<KeyValuePair<Type, object>>> querry(string querry,List<KeyValuePair<string, KeyValuePair<MySqlDbType,object>>> parms, int max = -1)
         {
+            Monitor.Enter(connLock);
             MySqlCommand cmd = new MySqlCommand(querry, conn);
             foreach (KeyValuePair<string,KeyValuePair<MySqlDbType,object>> param in parms)
             {
@@ -115,6 +116,7 @@ namespace Meditrash4_Midpoint
                 }
             }
             resultReader.Close();
+            Monitor.Exit(connLock);
             return returnVals;
         }
         public void setObjectParam<T>(T _object, string collum, MySqlDbType type, object value) where T : MysqlReadable
