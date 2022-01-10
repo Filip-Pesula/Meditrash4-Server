@@ -12,9 +12,10 @@
     <script>
         window.onload = async () => {
             userData = await window.localData.getLoadedUserData();
+            departments = await window.serverRequests.getAllDepartments();
 
-            for (const item of userData.favItems) {
-                document.getElementById('itemSelect').insertAdjacentHTML(
+            for (const item of departments) {
+                document.getElementById('department').insertAdjacentHTML(
                     'beforeend',
                     `<option value="${item.id}">${item.name} (id: ${item.id})</option>`
                 )
@@ -23,23 +24,25 @@
 
         async function addNewUser() {
             try {
-                const jsmeno = document.getElementById('jsmeno').value;
+                const name = document.getElementById('name').value;
                 const rodCislo = document.getElementById('rodCislo').value;
-                const fisrtName = document.getElementById('fisrtName').value;
+                const firstName = document.getElementById('firstName').value;
                 const lastName = document.getElementById('lastName').value;
                 const password = document.getElementById('password').value;
+                const department = document.getElementById('department').value;
+                const rights = document.getElementById('rights').value;
 
 
                 if (rodCislo == 0)  {
                     displayBanner('warning', 'rodCislo musí být větší než 0');
                     return;
                 }
-                if (jsmeno == '')  {
-                    displayBanner('warning', 'jsmeno musí obsahovat text');
+                if (name == '')  {
+                    displayBanner('warning', 'jmeno musí obsahovat text');
                     return;
                 }
-                if (fisrtName == '')  {
-                    displayBanner('warning', 'fisrtName musí obsahovat text');
+                if (firstName == '')  {
+                    displayBanner('warning', 'firstName musí obsahovat text');
                     return;
                 }
                 if (lastName == '')  {
@@ -53,10 +56,10 @@
 
                 await window.serverRequests.addNewUser({
                     department: department, 
-                    jsmeno: jsmeno,
+                    name: name,
                     rodCislo: rodCislo,
                     rights: rights,
-                    fisrtName: fisrtName,
+                    firstName: firstName,
                     lastName: lastName,
                     password: password
                 })
@@ -126,9 +129,9 @@
             <div class="card-body">
                 <h4 class="card-title mb-3">Vložení záznamu</h4>
                 <div class="mb-3 row">
-                    <label for="jsmeno" class="col-sm-4 col-form-label">Uživatelské jméno</label>
+                    <label for="name" class="col-sm-4 col-form-label">Uživatelské jméno</label>
                     <div class="col-sm-8">
-                        <input type="text" class="form-control" id="jsmeno" value="">
+                        <input type="text" class="form-control" id="name" value="">
                     </div>
                 </div>
                 <div class="mb-3 row">
@@ -137,10 +140,28 @@
                         <input type="number" class="form-control" id="rodCislo" value="">
                     </div>
                 </div>
+
                 <div class="mb-3 row">
-                    <label for="fisrtName" class="col-sm-4 col-form-label">Křestní jméno</label>
+                    <label for="department" class="col-sm-4 col-form-label">Oddělení</label>
                     <div class="col-sm-8">
-                        <input type="text" class="form-control" id="fisrtName" value="">
+                        <select  class="form-control" id="department" value="">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="rights" class="col-sm-4 col-form-label">Práva</label>
+                    <div class="col-sm-8">
+                        <select  class="form-control" id="rights" value="">
+                            <option value="1">Uživatel</option>
+                            <option value="2">Administrator</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="firstName" class="col-sm-4 col-form-label">Křestní jméno</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="firstName" value="">
                     </div>
                 </div>
                 <div class="mb-3 row">

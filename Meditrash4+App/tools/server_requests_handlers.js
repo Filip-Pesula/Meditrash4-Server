@@ -60,11 +60,17 @@ module.exports = class RequestsHandler {
         });
 
         this.#ipcInstance.handle('add_user', async (event, arg) => {
+            console.log(arg.department);
+            console.log(arg.name);
+            console.log(arg.password);
+            console.log( arg.rodCislo);
+            console.log(arg.rights);
+            console.log(arg.firstName);
+            console.log(arg.lastName);
             const data = RequestAssembler.createUserAdditionRequest(
-                arg.token, arg.department, arg.name, arg.password,
+                this.#dataStore.getSharedDataObj().user.token, arg.department, arg.name, arg.password,
                 arg.rodCislo, arg.rights, arg.firstName, arg.lastName
             );
-
             return this.writeData(data);
         });
 
@@ -83,8 +89,15 @@ module.exports = class RequestsHandler {
             return this.writeData(data);
         });
 
+        
+
         this.#ipcInstance.handle('get_items', async (event, arg) => {
             const data = RequestAssembler.createItemsAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
+            return this.writeData(data);
+        });
+
+        this.#ipcInstance.handle('get_departments', async (event, arg) => {
+            const data = RequestAssembler.createDepartmentAcquiringRequest(this.#dataStore.getSharedDataObj().user.token);
             return this.writeData(data);
         });
 
@@ -95,11 +108,6 @@ module.exports = class RequestsHandler {
 
         this.#ipcInstance.handle('remove_fav_item', async (event, arg) => {
             const data = RequestAssembler.createFavItemRemovalRequest(this.#dataStore.getSharedDataObj().user.token, arg.items);
-            return this.writeData(data);
-        });
-
-        this.#ipcInstance.handle('remove_record', async (event, arg) => {
-            const data = RequestAssembler.createRecordRemovalRequest(this.#dataStore.getSharedDataObj().user.token, arg.records);
             return this.writeData(data);
         });
 

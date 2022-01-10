@@ -27,12 +27,12 @@ namespace Meditrash4_Midpoint
             }
             try
             {
-                string department = requestCommand.Element("department").Value;
-                List<Department> departments = mySqlHandle.GetObjectList<Department>("name= @name",
+                int department = int.Parse(requestCommand.Element("department").Value);
+                List<Department> departments = mySqlHandle.GetObjectList<Department>("uid= @uid",
                     new List<KeyValuePair<string, KeyValuePair<MySqlDbType, object>>>
                                 { new KeyValuePair<string, KeyValuePair<MySqlDbType, object>>(
-                                            "@name",
-                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.VarChar,department))});
+                                            "@uid",
+                                            new KeyValuePair<MySqlDbType, object>(MySqlDbType.Int32,department))});
                 if (departments.Count == 0)
                 {
                     return genIncorrectResponse("addUser", "incorrectName", "department has incorrect name");
@@ -185,7 +185,7 @@ namespace Meditrash4_Midpoint
                 rootRes.SetAttributeValue("name", "getDepartments");
                 foreach (Department department in departmentList)
                 {
-                    XElement item = new XElement("deepartment");
+                    XElement item = new XElement("department");
                     item.SetAttributeValue("name", department.name);
                     item.SetAttributeValue("id", department.id);
                     rootRes.Add(item);
