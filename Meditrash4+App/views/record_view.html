@@ -58,7 +58,7 @@
         }
 
         async function getRecords(takeSavedValues) {
-            document.getElementById('recordsCard').classList.add('ivisible');
+            document.getElementById('recordsCard').classList.add('invisible');
             document.getElementById('records').childNodes.forEach(childNode => childNode.remove());
 
             if (!takeSavedValues) {
@@ -67,25 +67,43 @@
                 category = document.getElementById('category').value;
             }
 
-            const startDate = (startDateInput == '') ? new Date('2000-01-01') : new Date(startDateInput);
+            const startDate = (startDateInput == '') ? new Date('1970-01-01') : new Date(startDateInput);
             const endDate = (endDateInput == '') ? new Date() : new Date(endDateInput);
 
-            const data = await window.serverRequests.getRecords({ startDate, endDate, category });
+            let data;
 
+            try {
+                data = await window.serverRequests.getRecords({ startDate, endDate, category });
+            } catch (error) {
+                displayBanner('danger', "Chyba při získávání dat");
+                return;
+            }
             if (data === null) {
                 document.getElementById('recordsCard').classList.remove('invisible');
                 document.getElementById('records').insertAdjacentHTML(
-                    'afterBegin', `<h4 class="mb-0 text-center">Zvoleným parametrům neodpovídají žádné záznamy</h4>`);
+                    'afterBegin', `<h5 class="mb-0 text-center">Zvoleným parametrům neodpovídají žádné záznamy</h5>`);
                 return;
             }
 
             createTable('Tabulka záznamů', data);
         }
+
+        function displayBanner(type, message) {
+            const html =
+                `<div id="errorBanner" class="row align-items-center"><div class="col"></div>
+            <div class="alert alert-${type} shadow col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7" role="alert">${message}</div>
+            <div class="col"></div></div>`;
+
+            document.getElementById('mainCard').insertAdjacentHTML('beforeBegin', html);
+
+            setTimeout(() => {
+                document.getElementById('errorBanner').remove()
+            }, 5000);
+        }
     </script>
 </head>
-
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow mb-4">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">MediTrash4+</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -119,52 +137,47 @@
             </div>
         </div>
     </nav>
-    <div class="row align-items-center">
-        <div class="col"></div>
-        <div class="card shadow col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7 mt-5">
-            <div class="card-body">
-                <h4 class="card-title mb-3">Přehled záznamů</h4>
-                <div class="mb-3 row">
+    <div class="container-fluid">
+        <div id="mainCard" class="row align-items-center">
+            <div class="col"></div>
+            <div class="card shadow col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Přehled záznamů</h4>
+                    <div class="mb-3 row">
 
-                    <div class="col-sm-3">
-                        <label for="from" class="col-form-label">Od</label>
-                        <div class="">
-                            <input type="date" class="form-control" id="from">
+                        <div class="col-sm-3">
+                            <label for="from" class="col-form-label">Od</label>
+                            <div class="">
+                                <input type="date" class="form-control" id="from">
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <label for="to" class="col-sm-3 col-form-label">Do</label>
+                            <div class="col-sm-12">
+                                <input type="date" class="form-control" id="to">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="category" class="col-sm-12 col-form-label">Kategorie</label>
+                            <div class="col-sm-12">
+                                <select id="category" class="form-select"></select>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-sm-3">
-                        <label for="to" class="col-sm-3 col-form-label">Do</label>
-                        <div class="col-sm-12">
-                            <input type="date" class="form-control" id="to">
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <label for="category" class="col-sm-12 col-form-label">Kategorie</label>
-                        <div class="col-sm-12">
-                            <select id="category" class="form-select"></select>
-                        </div>
-                    </div>
+                    <button type="button" class="btn btn-primary" onclick="getRecords(false)">Zobrazit</button>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="getRecords(false)">Zobrazit</button>
             </div>
+            <div class="col"></div>
         </div>
-        <div class="col"></div>
-    </div>
-    <div id='recordsCard' class="row align-items-center invisible">
-        <div class="col"></div>
-        <div class="card shadow col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7  mt-5">
-            <div id='records' class="card-body">
+        <div id='recordsCard' class="row align-items-center invisible">
+            <div class="col"></div>
+            <div class="card shadow col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7  mt-5">
+                <div id='records' class="card-body">
 
+                </div>
             </div>
+            <div class="col"></div>
         </div>
-        <div class="col"></div>
-    </div>
-    <div class="row align-items-center">
-        <div class="col"></div>
-        <div id="error_alert" class="alert alert-danger shadow invisible col-12 col-sm-12 col-md-11 col-lg-9 col-xl-7"
-            role="alert">
-        </div>
-        <div class="col"></div>
     </div>
 </body>
 
