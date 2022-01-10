@@ -18,5 +18,14 @@
   "dependencies": {
     "xml2js": "^0.4.23",
     "xmlbuilder": "^15.1.1"
+  },
+  "build": {
+    "appId": "meditrash4+",
+    "win": {
+      "target": "msi"
+    },
+    "linux": {
+      "target": "deb"
+    }
   }
 }
