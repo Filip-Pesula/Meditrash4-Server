@@ -1,6 +1,6 @@
 # Meditrash4-Server
 ![link](/Docs/Logo.png "Logo")<br/>
-# Zadani
+# Zadání
 
 # Projekt 3: Meditrash +
 
@@ -31,7 +31,7 @@ Inisoft - EVI 8, ENVITA.cz - obecné programy pro evidenci odpadů - všechny ka
 #### Why
 
 - Úspora času
-- Snažší práce
+- Snazší práce
 
 #### Who
 
@@ -193,7 +193,7 @@ Ano, to je pravda a především jde o to, že ISPOP nesbírá průběžnou evid
 
 # Řešení
 aplikace je složena ze 3 modulů<br/>
-UserApp - aplikace řídící načítání dat a zobrazování dat uživately<br/>
+UserApp - aplikace řídící načítání dat a zobrazování dat uživateli<br/>
 AppConnector - zpracovává požadavky od UserApp a komunikuje s databází<br/>
 Mysql Server - databáze držící data<br/>
 
@@ -208,13 +208,13 @@ C# a MySql API - backend<br/>
 (Node)JS elektron - frontend<br/>
 MySql - databáze<br/>
 
-Komunikace mezi serverem a Ui je přez tcp, pomocí předem stanovených Xml requestů.
+Komunikace mezi serverem a UI je přes TCP, pomocí předem stanovených XML requestů.
 
 
 # Připojení k databáze
 
-připojení k databázi je pomocí MySql API, která je uzavřená v MySqlHandle. Ta umožnuje volat jednotlivé requesty a kontrolu data a sql injection.
-MySqlHandle dale obsahuje Drop a Create skripty které společně s 
+připojení k databázi je pomocí MySql API, která je uzavřená v MySqlHandle. Ta umožňuje volat jednotlivé requesty a kontrolu data a SQL injection.
+MySqlHandle dále obsahuje Drop a Create skripty které společně s 
 
 ```C#
 class MySqlHandle
@@ -241,8 +241,8 @@ class MySqlHandle
 
 
 # SQL Injection
-Řešení sql injection je pomocí vnitřní struktury api která umožnňuje vytovření sql reqesutu se zvolenýmy proměnnými a ty jsou poté vezpečně nahrazeny daty, kdy API vždy kontroluje datové typy.<br/>
-Pokud pracujo s celýmy objekty je jeich uládání enkapsulvýno pomocí inteface MySqlReadable, který umožňuje uniformní kontrolované zabezpečení dat.
+Řešení SQL injection je pomocí vnitřní struktury API která umožňuje vytvoření SQL requestu se zvolenými proměnnými a ty jsou poté bezpečně nahrazeny daty, kdy API vždy kontroluje datové typy.<br/>
+Pokud pracují s celými objekty je jejich ukládání enkapsulováno pomocí inteface MySqlReadable, který umožňuje uniformní kontrolované zabezpečení dat.
 ```C#
 var data = mySqlHandle.querry(
    @"select records.uid,Rec_Odp_User_Trc.id,Rec_Odp_User_Trc.name,storageDate,amount,Odpad_uid,Rec_Odp.name,Rec_Odp_User.name from records 
